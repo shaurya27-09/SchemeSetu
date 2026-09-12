@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Building2, 
   CheckCircle2, 
@@ -8,12 +8,13 @@ import {
   Globe, 
   Menu, 
   X, 
-  User, 
   Sparkles,
   Scale,
   Bookmark,
   LogIn,
-  ShieldCheck
+  ShieldCheck,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { Language, TRANSLATIONS } from '../../utils/translations';
 import { APP_CONFIG } from '../../config/appConfig';
@@ -42,6 +43,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [savedCount, setSavedCount] = useState<number>(() => dataStore.getSavedSchemeIds().length);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const navScrollRef = useRef<HTMLDivElement>(null);
+
   const { user, profile, role } = useAuth();
   const t = TRANSLATIONS[language];
 
@@ -66,6 +71,101 @@ export const Navbar: React.FC<NavbarProps> = ({
       badge: savedCount > 0 ? savedCount : undefined 
     },
   ];
+
+  const checkScrollButtons = useCallback(() => {
+    const container = navScrollRef.current;
+    if (!container) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    // 2px tolerance for subpixel rounding
+    const canLeft = scrollLeft > 2;
+    const canRight = scrollLeft < scrollWidth - clientWidth - 2;
+
+    setCanScrollLeft(canLeft);
+    setCanScrollRight(canRight);
+  }, []);
+
+  const scrollNav = (direction: 'left' | 'right') => {
+    const container = navScrollRef.current;
+    if (!container) return;
+
+    container.scrollBy({
+      left: direction === 'left' ? -300 : 300,
+      behavior: 'smooth',
+    });
+  };
+
+  useEffect(() => {
+    checkScrollButtons();
+    const timer = setTimeout(checkScrollButtons, 60);
+
+    const container = navScrollRef.current;
+    if (!container) return () => clearTimeout(timer);
+
+    window.addEventListener('resize', checkScrollButtons);
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => {
+        checkScrollButtons();
+      });
+      resizeObserver.observe(container);
+      if (container.firstElementChild) {
+        resizeObserver.observe(container.firstElementChild);
+      }
+    }
+
+    // Support mouse wheel horizontal translation without hijacking normal page scrolling
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+
+      const maxScroll = container.scrollWidth - container.clientWidth;
+      if (maxScroll <= 0) return;
+
+      const isScrollingDown = e.deltaY > 0;
+      const isScrollingUp = e.deltaY < 0;
+
+      const canRightNow = container.scrollLeft < maxScroll - 2;
+      const canLeftNow = container.scrollLeft > 2;
+
+      if ((isScrollingDown && canRightNow) || (isScrollingUp && canLeftNow)) {
+        e.preventDefault();
+        container.scrollLeft += e.deltaY;
+        checkScrollButtons();
+      }
+    };
+
+    container.addEventListener('wheel', onWheel, { passive: false });
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', checkScrollButtons);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+      container.removeEventListener('wheel', onWheel);
+    };
+  }, [checkScrollButtons, role, language, savedCount]);
+
+  // Keep active item in visible scroll area when active view changes
+  useEffect(() => {
+    if (currentView && navScrollRef.current) {
+      const activeBtn = navScrollRef.current.querySelector<HTMLElement>(`#nav-link-${currentView}`);
+      if (activeBtn) {
+        const container = navScrollRef.current;
+        const btnLeft = activeBtn.offsetLeft;
+        const btnRight = btnLeft + activeBtn.offsetWidth;
+        const scrollLeft = container.scrollLeft;
+        const scrollRight = scrollLeft + container.clientWidth;
+
+        if (btnLeft < scrollLeft) {
+          container.scrollTo({ left: Math.max(0, btnLeft - 16), behavior: 'smooth' });
+        } else if (btnRight > scrollRight) {
+          container.scrollTo({ left: btnRight - container.clientWidth + 16, behavior: 'smooth' });
+        }
+      }
+    }
+  }, [currentView]);
 
   const rawName = profile?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Citizen';
   // Strip out parenthetical roles like (Nodal Officer) and domain/email noise from header button
@@ -128,56 +228,110 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
 
-          {/* AREA 2 - CENTER: Desktop Navigation Links (Only navigation links may scroll horizontally) */}
-          <nav className="hidden lg:flex flex-1 min-w-0 items-center gap-1 overflow-x-auto whitespace-nowrap nav-scroll py-1 px-1 sm:px-2 mx-1 sm:mx-2">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = currentView === item.id;
-              return (
-                <button
-                  key={item.id}
-                  id={`nav-link-${item.id}`}
-                  onClick={() => setCurrentView(item.id)}
-                  className={`relative shrink-0 flex items-center space-x-1 sm:space-x-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer whitespace-nowrap ${
-                    item.highlight
-                      ? 'bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 shadow-sm shadow-indigo-200 dark:shadow-none'
-                      : isActive
-                      ? 'text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 font-bold'
-                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  <Icon className={`w-3.5 h-3.5 shrink-0 ${item.highlight ? 'text-white' : isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-400'}`} />
-                  <span className="whitespace-nowrap">{item.label}</span>
-                  {item.badge !== undefined && (
-                    <span className="ml-1 px-1.5 py-0.2 rounded-full bg-amber-500 text-white text-[10px] font-bold shrink-0">
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* AREA 3 - RIGHT: Responsive Right Controls */}
-          <div className="shrink-0 flex items-center space-x-1.5 sm:space-x-2 min-w-0">
-            {/* Admin Portal (Strictly visible only if role === 'admin') */}
-            {role === 'admin' && (
+          {/* AREA 2 - CENTER: Desktop Navigation Links with Fixed Scroll Controls */}
+          <div className="hidden lg:flex items-center min-w-0 flex-1 mx-1.5 sm:mx-2">
+            {/* Left Scroll Button - Fixed next to scrollable items */}
+            {canScrollLeft && (
               <button
-                id="nav-link-admin"
-                onClick={() => setCurrentView('admin')}
-                className={`shrink-0 flex items-center space-x-1 sm:space-x-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
-                  currentView === 'admin' || currentView === 'admin_new_scheme'
-                    ? 'bg-purple-700 text-white shadow-xs'
-                    : 'text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/60'
-                }`}
-                title="Ministry Administrator Portal"
+                type="button"
+                onClick={() => scrollNav('left')}
+                aria-label="Scroll navigation left"
+                className="shrink-0 mr-1.5 p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 shadow-xs transition focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                title="Scroll navigation left"
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-purple-600 dark:text-purple-300 shrink-0" />
-                <span className="hidden xl:inline">{t.navAdmin || 'Admin Portal'}</span>
-                <span className="xl:hidden">Admin</span>
+                <ChevronLeft className="w-4 h-4" />
               </button>
             )}
 
+            {/* Scroll Container Wrapper with subtle edge fades */}
+            <div className="relative flex-1 min-w-0 overflow-hidden py-1">
+              {/* Subtle Left Edge Fade */}
+              {canScrollLeft && (
+                <div 
+                  className="pointer-events-none absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-white dark:from-slate-900 to-transparent z-10"
+                  aria-hidden="true" 
+                />
+              )}
+
+              {/* Scrollable Navigation Items */}
+              <nav
+                ref={navScrollRef}
+                onScroll={checkScrollButtons}
+                className="flex-1 min-w-0 overflow-x-auto scroll-smooth nav-scroll"
+                aria-label="Main Navigation"
+              >
+                <div className="flex items-center gap-1 w-max">
+                  {navItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = currentView === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        id={`nav-link-${item.id}`}
+                        onClick={() => setCurrentView(item.id)}
+                        className={`relative shrink-0 flex items-center space-x-1 sm:space-x-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer whitespace-nowrap ${
+                          item.highlight
+                            ? 'bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 shadow-sm shadow-indigo-200 dark:shadow-none'
+                            : isActive
+                            ? 'text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 font-bold'
+                            : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                        }`}
+                      >
+                        <Icon className={`w-3.5 h-3.5 shrink-0 ${item.highlight ? 'text-white' : isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-400'}`} />
+                        <span className="whitespace-nowrap">{item.label}</span>
+                        {item.badge !== undefined && (
+                          <span className="ml-1 px-1.5 py-0.2 rounded-full bg-amber-500 text-white text-[10px] font-bold shrink-0">
+                            {item.badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+
+                  {/* Admin Portal in scrollable nav (Strictly visible only if role === 'admin') */}
+                  {role === 'admin' && (
+                    <button
+                      id="nav-link-admin"
+                      onClick={() => setCurrentView('admin')}
+                      className={`relative shrink-0 flex items-center space-x-1 sm:space-x-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap ${
+                        currentView === 'admin' || currentView === 'admin_new_scheme'
+                          ? 'bg-purple-700 text-white shadow-xs'
+                          : 'text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 hover:bg-purple-100 dark:hover:bg-purple-900/60'
+                      }`}
+                      title="Ministry Administrator Portal"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5 text-purple-600 dark:text-purple-300 shrink-0" />
+                      <span className="whitespace-nowrap">{t.navAdmin || 'Admin Portal'}</span>
+                    </button>
+                  )}
+                </div>
+              </nav>
+
+              {/* Subtle Right Edge Fade */}
+              {canScrollRight && (
+                <div 
+                  className="pointer-events-none absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-white dark:from-slate-900 to-transparent z-10"
+                  aria-hidden="true" 
+                />
+              )}
+            </div>
+
+            {/* Right Scroll Button - Fixed next to scrollable items */}
+            {canScrollRight && (
+              <button
+                type="button"
+                onClick={() => scrollNav('right')}
+                aria-label="Scroll navigation right"
+                className="shrink-0 ml-1.5 p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 shadow-xs transition focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                title="Scroll navigation right"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {/* AREA 3 - RIGHT: Responsive Right Controls */}
+          <div className="shrink-0 flex items-center space-x-1.5 sm:space-x-2 min-w-0">
             {/* Scheme Mitra AI Assistant Trigger */}
             <button
               id="btn-scheme-mitra-nav"
