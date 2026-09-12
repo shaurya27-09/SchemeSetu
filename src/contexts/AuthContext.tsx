@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '../services/supabaseClient';
+import { UserRole } from '../types';
 
 export interface UserProfileData {
   id?: string;
@@ -27,7 +28,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: UserProfileData | null;
-  role: 'user';
+  role: UserRole;
   loading: boolean;
   error: string | null;
   isDemoUser: boolean;
@@ -37,18 +38,20 @@ interface AuthContextType {
   updateProfile: (data: Partial<UserProfileData>) => Promise<{ success: boolean; error?: string }>;
   refreshProfile: () => Promise<void>;
   setDemoUser: () => void;
+  setDemoAdmin: () => void;
   clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const DEMO_USER_ID_ENTREPRENEUR = '11111111-2222-3333-4444-555555555555';
+const DEMO_ADMIN_ID_OFFICER = '99999999-8888-7777-6666-555555555555';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfileData | null>(null);
-  const [role, setRole] = useState<'user'>('user');
+  const [role, setRole] = useState<UserRole>('user');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isDemoUser, setIsDemoUser] = useState<boolean>(false);
@@ -105,18 +108,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
   }, []);
 
-  // Fetch profile and role from Supabase tables
+  // Fetch profile and authoritative role from Supabase user_roles table
   const loadUserProfileAndRole = async (userId: string) => {
     try {
-      // 1. Fetch user role from `user_roles` (kept for database schema compatibility)
+      // 1. Authoritative check: Fetch user role from `user_roles`
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
         .maybeSingle();
 
-      // All authenticated members are treated as normal users
-      setRole('user');
+      if (!roleError && roleData?.role) {
+        setRole(roleData.role === 'admin' ? 'admin' : 'user');
+      } else {
+        // Fallback check on profiles table if migration is syncing
+        const { data: profileRoleData } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', userId)
+          .maybeSingle();
+
+        if (profileRoleData?.role === 'admin') {
+          setRole('admin');
+        } else {
+          setRole('user');
+        }
+      }
 
       // 2. Fetch profile from `profiles`
       const { data: profileData, error: profileError } = await supabase
@@ -130,8 +147,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     } catch (err) {
       console.warn('[Auth] Error fetching profile/role:', err);
+      setRole('user');
     }
   };
+
 
   // Sign In
   const signIn = async (email: string, password: string) => {
@@ -331,6 +350,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   };
 
+  // Preset demo admin for evaluating administrative workflows
+  const setDemoAdmin = () => {
+    setIsDemoUser(true);
+    setRole('admin');
+
+    const mockAdminId = DEMO_ADMIN_ID_OFFICER;
+    const mockAdminEmail = 'admin.officer@nic.in';
+    const mockAdminName = 'Rajesh Verma (Nodal Officer)';
+
+    const mockAdminUser: any = {
+      id: mockAdminId,
+      email: mockAdminEmail,
+      user_metadata: { full_name: mockAdminName, role: 'admin' },
+      app_metadata: { role: 'admin' },
+      aud: 'authenticated',
+      created_at: new Date().toISOString(),
+    };
+
+    setUser(mockAdminUser);
+    setProfile({
+      id: mockAdminId,
+      full_name: mockAdminName,
+      phone: '9811002233',
+      gender: 'male',
+      state_code: 'DL',
+      district: 'New Delhi',
+      business_sector: 'administration',
+      business_description: 'MoSJE Statutory Scheme Administrator & Nodal Officer',
+    });
+  };
+
   const clearError = () => setError(null);
 
   return (
@@ -349,6 +399,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         updateProfile,
         refreshProfile,
         setDemoUser,
+        setDemoAdmin,
         clearError,
       }}
     >

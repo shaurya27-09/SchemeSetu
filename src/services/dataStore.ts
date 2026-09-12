@@ -6,7 +6,8 @@ import {
   fetchUserSavedSchemeIds,
   toggleSaveScheme,
   fetchDocumentChecklist,
-  saveDocumentChecklist
+  saveDocumentChecklist,
+  updateSchemeAdminStatus
 } from './supabaseService';
 import { supabase, isSupabaseConfigured } from './supabaseClient';
 
@@ -191,6 +192,24 @@ export class DataStore {
     if (!scheme) return false;
 
     scheme.active = !scheme.active;
+    this.persistSchemes();
+    
+    // Background sync with Supabase
+    updateSchemeAdminStatus(schemeId, scheme.active).catch(err => {
+      console.warn('[DataStore] toggleSchemeActive Supabase sync note:', err);
+    });
+
+    return true;
+  }
+
+  public addScheme(newScheme: Scheme): boolean {
+    // Check for duplicate code
+    const existingIndex = this.schemes.findIndex(s => s.id === newScheme.id || s.code === newScheme.code);
+    if (existingIndex >= 0) {
+      this.schemes[existingIndex] = newScheme;
+    } else {
+      this.schemes.unshift(newScheme);
+    }
     this.persistSchemes();
     return true;
   }

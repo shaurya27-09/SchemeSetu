@@ -18,40 +18,47 @@ import { formatIndianCurrency } from '../../services/emiCalculator';
 
 interface SchemeCompareProps {
   language: Language;
-  selectedSchemes: Scheme[];
+  selectedSchemes?: Scheme[];
+  comparedSchemes?: Scheme[];
   onRemoveScheme: (schemeId: string) => void;
-  onAddScheme: (scheme: Scheme) => void;
+  onAddScheme?: (scheme: Scheme) => void;
   onSelectSchemeDetails: (scheme: Scheme) => void;
   onOpenChecklist: (scheme: Scheme) => void;
+  onOpenLocator?: (scheme: Scheme) => void;
+  onExploreSchemes?: () => void;
 }
 
 export const SchemeCompare: React.FC<SchemeCompareProps> = ({
   language,
-  selectedSchemes,
+  selectedSchemes: propSelectedSchemes,
+  comparedSchemes: propComparedSchemes,
   onRemoveScheme,
   onAddScheme,
   onSelectSchemeDetails,
-  onOpenChecklist
+  onOpenChecklist,
+  onOpenLocator,
+  onExploreSchemes
 }) => {
   const t = TRANSLATIONS[language];
-  const allSchemes = dataStore.getSchemes().filter(s => s.active);
+  const selectedSchemes = (propSelectedSchemes || propComparedSchemes || []).filter(Boolean);
+  const allSchemes = dataStore.getSchemes().filter(s => s && s.active);
 
   // Available schemes not yet added to comparison
   const availableToAdd = allSchemes.filter(
-    s => !selectedSchemes.some(sel => sel.id === s.id)
+    s => s && !selectedSchemes.some(sel => sel && sel.id === s.id)
   );
 
   // Calculate Trade-Off Superlatives
   const bestRateScheme = selectedSchemes.length > 0 
-    ? [...selectedSchemes].sort((a, b) => a.terms.interestRateMin - b.terms.interestRateMin)[0]
+    ? [...selectedSchemes].sort((a, b) => (a.terms?.interestRateMin ?? 0) - (b.terms?.interestRateMin ?? 0))[0]
     : null;
 
   const highestFundingScheme = selectedSchemes.length > 0
-    ? [...selectedSchemes].sort((a, b) => b.rules.maxLoanAmount - a.rules.maxLoanAmount)[0]
+    ? [...selectedSchemes].sort((a, b) => (b.rules?.maxLoanAmount ?? 0) - (a.rules?.maxLoanAmount ?? 0))[0]
     : null;
 
   const longestTenureScheme = selectedSchemes.length > 0
-    ? [...selectedSchemes].sort((a, b) => b.terms.tenureYearsMax - a.terms.tenureYearsMax)[0]
+    ? [...selectedSchemes].sort((a, b) => (b.terms?.tenureYearsMax ?? 0) - (a.terms?.tenureYearsMax ?? 0))[0]
     : null;
 
   return (
@@ -82,7 +89,7 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
               id="select-add-scheme-compare"
               onChange={(e) => {
                 const s = allSchemes.find(item => item.id === e.target.value);
-                if (s) {
+                if (s && onAddScheme) {
                   onAddScheme(s);
                   e.target.value = "";
                 }

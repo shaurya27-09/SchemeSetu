@@ -15,11 +15,17 @@ export interface GeneratedChecklistItem {
 }
 
 export function generatePersonalizedChecklist(
-  scheme: Scheme,
+  scheme?: Scheme | null,
   profile?: ApplicantProfile | null,
   completedCodes: string[] = []
 ): GeneratedChecklistItem[] {
   const items: GeneratedChecklistItem[] = [];
+  if (!scheme) return items;
+
+  const rules = scheme.rules || ({} as Partial<Scheme['rules']>);
+  const eligibleCategories = rules.eligibleCategories || [];
+  const maxAnnualIncome = rules.maxAnnualIncome ?? 0;
+  const minProjectCost = rules.minProjectCost ?? 0;
 
   // 1. Core Identity & Address (Universal for all Indian lending schemes)
   items.push({
@@ -49,7 +55,7 @@ export function generatePersonalizedChecklist(
   });
 
   // 2. Affirmative Caste / Community / Occupation Proof
-  if (scheme.rules.eligibleCategories.includes('SC')) {
+  if (eligibleCategories.includes('SC')) {
     items.push({
       code: "DOC_SC_CASTE",
       title: "Scheduled Caste (SC) Community Certificate",
@@ -64,7 +70,7 @@ export function generatePersonalizedChecklist(
     });
   }
 
-  if (scheme.rules.eligibleCategories.includes('OBC') || scheme.rules.eligibleCategories.includes('EBC')) {
+  if (eligibleCategories.includes('OBC') || eligibleCategories.includes('EBC')) {
     items.push({
       code: "DOC_OBC_NCL",
       title: "OBC Non-Creamy Layer (NCL) Certificate",
@@ -79,7 +85,7 @@ export function generatePersonalizedChecklist(
     });
   }
 
-  if (scheme.rules.eligibleCategories.includes('SafaiKaramchari')) {
+  if (eligibleCategories.includes('SafaiKaramchari')) {
     items.push({
       code: "DOC_SAN_WORKER",
       title: "Safai Karamchari / Sanitation Worker Proof",
@@ -95,11 +101,11 @@ export function generatePersonalizedChecklist(
   }
 
   // 3. Income Certificate
-  if (scheme.rules.maxAnnualIncome > 0) {
+  if (maxAnnualIncome > 0) {
     items.push({
       code: "DOC_INCOME",
-      title: `Family Income Certificate (Ceiling: ₹${(scheme.rules.maxAnnualIncome / 100000).toFixed(1)} Lakh)`,
-      titleHi: `पारिवारिक आय प्रमाण पत्र (अधिकतम सीमा: ₹${(scheme.rules.maxAnnualIncome / 100000).toFixed(1)} लाख)`,
+      title: `Family Income Certificate (Ceiling: ₹${(maxAnnualIncome / 100000).toFixed(1)} Lakh)`,
+      titleHi: `पारिवारिक आय प्रमाण पत्र (अधिकतम सीमा: ₹${(maxAnnualIncome / 100000).toFixed(1)} लाख)`,
       description: "Valid income certificate proving annual household earnings are below the scheme cap.",
       descriptionHi: "परिवार की कुल वार्षिक आय योजना सीमा के भीतर होने का प्रमाण।",
       category: "eligibility",
@@ -111,7 +117,7 @@ export function generatePersonalizedChecklist(
   }
 
   // 4. Business & Project Quotation
-  const effectiveCost = profile ? profile.projectCost : scheme.rules.minProjectCost;
+  const effectiveCost = profile ? profile.projectCost : minProjectCost;
   const isLargeProject = effectiveCost > 200000;
 
   items.push({
@@ -176,8 +182,8 @@ export function generatePersonalizedChecklist(
   return items;
 }
 
-export function generateDocumentChecklist(scheme: Scheme, profile?: ApplicantProfile | null) {
-  const items = generatePersonalizedChecklist(scheme, profile);
+export function generateDocumentChecklist(scheme?: Scheme | null, profile?: ApplicantProfile | null) {
+  const items = generatePersonalizedChecklist(scheme, profile) || [];
   return {
     mandatory: items.filter(i => i.requirementType === 'required').map(i => ({
       id: i.code,

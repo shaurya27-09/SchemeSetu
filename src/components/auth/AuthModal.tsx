@@ -24,7 +24,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   defaultMode = 'login',
 }) => {
-  const { signIn, signUp, setDemoUser, error, clearError, loading } = useAuth();
+  const { signIn, signUp, setDemoUser, setDemoAdmin, error, clearError, loading } = useAuth();
   const [mode, setMode] = useState<'login' | 'signup'>(defaultMode);
   
   // Form fields
@@ -57,7 +57,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           if (res.requiresVerification) {
             setSuccessMsg(res.error || 'Account created! Please check your email to verify.');
           } else {
-            setSuccessMsg('Account created and logged in!');
+            setSuccessMsg('Account created and logged in as User!');
             setTimeout(() => {
               onClose();
             }, 800);
@@ -71,11 +71,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleQuickDemo = () => {
     setDemoUser();
-    setSuccessMsg('Switched to active demo applicant session!');
+    setSuccessMsg('Switched to active demo applicant session (Normal User)!');
     setTimeout(() => {
       onClose();
     }, 600);
   };
+
+  const handleQuickAdminDemo = () => {
+    setDemoAdmin();
+    setSuccessMsg('Switched to Ministry Nodal Officer session (Admin Role)!');
+    setTimeout(() => {
+      onClose();
+    }, 600);
+  };
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200">
@@ -236,14 +245,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="button"
               onClick={handleQuickDemo}
-              className="w-full p-2.5 text-left rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/70 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:border-indigo-300 dark:hover:border-indigo-600 transition group cursor-pointer"
+              className="w-full p-2.5 text-left rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/70 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:border-indigo-300 dark:hover:border-indigo-600 transition group cursor-pointer mb-2"
             >
               <div className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 flex items-center justify-between">
                 <span>SC Entrepreneur (Rameshwar Kumar)</span>
-                <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded">Demo User</span>
+                <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded">Role: User</span>
               </div>
               <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                Pre-configured affirmative action profile: Delhi, Retail Sector
+                Standard citizen applicant (normal user role)
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleQuickAdminDemo}
+              className="w-full p-2.5 text-left rounded-xl border border-purple-200 dark:border-purple-900/60 bg-purple-50/40 dark:bg-purple-950/20 hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:border-purple-400 dark:hover:border-purple-600 transition group cursor-pointer"
+            >
+              <div className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-purple-600 dark:group-hover:text-purple-400 flex items-center justify-between">
+                <span>Nodal Officer (Rajesh Verma)</span>
+                <span className="text-[10px] text-purple-700 dark:text-purple-300 font-semibold bg-purple-100 dark:bg-purple-900/60 px-2 py-0.5 rounded">Role: Admin</span>
+              </div>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                Ministry scheme administrator with full Admin Portal access
               </div>
             </button>
           </div>

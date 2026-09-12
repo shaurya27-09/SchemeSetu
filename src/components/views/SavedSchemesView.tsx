@@ -166,7 +166,7 @@ export const SavedSchemesView: React.FC<SavedSchemesViewProps> = ({
                       <span>Max Loan</span>
                     </span>
                     <div className="text-xs font-bold text-slate-900 dark:text-white mt-0.5">
-                      {formatIndianCurrency(scheme.rules.maxLoanAmount)}
+                      {formatIndianCurrency(scheme.rules?.maxLoanAmount ?? 500000)}
                     </div>
                   </div>
 
@@ -176,16 +176,16 @@ export const SavedSchemesView: React.FC<SavedSchemesViewProps> = ({
                       <span>Interest Rate</span>
                     </span>
                     <div className="text-xs font-bold text-slate-900 dark:text-white mt-0.5">
-                      {scheme.interestRateMin}% – {scheme.interestRateMax}% p.a.
+                      {scheme.terms?.interestRateMin ?? 4}% – {scheme.terms?.interestRateMax ?? 8}% p.a.
                     </div>
                   </div>
                 </div>
 
                 {/* Women rebate notice if any */}
-                {scheme.rules.specialRebates?.womenRebatePercent && (
+                {(scheme.terms?.rebateForWomenPercent ?? 0) > 0 && (
                   <div className="mt-2.5 px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-[11px] text-emerald-800 dark:text-emerald-300 flex items-center space-x-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
-                    <span>Women Rebate: {scheme.rules.specialRebates.womenRebatePercent}% interest subvention</span>
+                    <span>Women Rebate: {scheme.terms?.rebateForWomenPercent}% interest subvention</span>
                   </div>
                 )}
               </div>

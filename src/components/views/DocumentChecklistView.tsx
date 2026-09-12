@@ -35,7 +35,10 @@ export const DocumentChecklistView: React.FC<DocumentChecklistViewProps> = ({
   const activeProfile = profile || dataStore.getSavedProfile();
 
   // Document checklist with prepared checkboxes
-  const checklist = generateDocumentChecklist(activeScheme, activeProfile);
+  const checklist = generateDocumentChecklist(activeScheme, activeProfile) || { mandatory: [], conditional: [], optional: [] };
+  const mandatoryList = checklist.mandatory || [];
+  const conditionalList = checklist.conditional || [];
+  const optionalList = checklist.optional || [];
   const [preparedDocs, setPreparedDocs] = useState<Record<string, boolean>>({});
 
   const togglePrepared = (docId: string) => {
@@ -45,7 +48,7 @@ export const DocumentChecklistView: React.FC<DocumentChecklistViewProps> = ({
     }));
   };
 
-  const totalMandatory = checklist.mandatory.length + checklist.conditional.length;
+  const totalMandatory = mandatoryList.length + conditionalList.length;
   const preparedCount = Object.values(preparedDocs).filter(Boolean).length;
 
   const handlePrint = () => {
@@ -140,7 +143,7 @@ export const DocumentChecklistView: React.FC<DocumentChecklistViewProps> = ({
           </div>
 
           <div className="space-y-3">
-            {checklist.mandatory.map((doc) => {
+            {mandatoryList.map((doc) => {
               const isChecked = Boolean(preparedDocs[doc.id]);
               return (
                 <div 
@@ -181,7 +184,7 @@ export const DocumentChecklistView: React.FC<DocumentChecklistViewProps> = ({
         </div>
 
         {/* 2. CONDITIONAL DOCUMENTS */}
-        {checklist.conditional.length > 0 && (
+        {conditionalList.length > 0 && (
           <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
             <div className="flex items-center space-x-2">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
@@ -191,7 +194,7 @@ export const DocumentChecklistView: React.FC<DocumentChecklistViewProps> = ({
             </div>
 
             <div className="space-y-3">
-              {checklist.conditional.map((doc) => {
+              {conditionalList.map((doc) => {
                 const isChecked = Boolean(preparedDocs[doc.id]);
                 return (
                   <div 
@@ -233,7 +236,7 @@ export const DocumentChecklistView: React.FC<DocumentChecklistViewProps> = ({
         )}
 
         {/* 3. OPTIONAL / VALUE-ADD DOCUMENTS */}
-        {checklist.optional.length > 0 && (
+        {optionalList.length > 0 && (
           <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
             <div className="flex items-center space-x-2">
               <span className="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
@@ -243,7 +246,7 @@ export const DocumentChecklistView: React.FC<DocumentChecklistViewProps> = ({
             </div>
 
             <div className="space-y-3">
-              {checklist.optional.map((doc) => {
+              {optionalList.map((doc) => {
                 const isChecked = Boolean(preparedDocs[doc.id]);
                 return (
                   <div 

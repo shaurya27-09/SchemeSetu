@@ -449,14 +449,14 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                   {/* EXPLAINABILITY BLOCK: WHY ELIGIBLE / WHY INELIGIBLE */}
                   <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
                     {/* Eligible Reasons */}
-                    {result.reasonsEligible.length > 0 && (
+                    {(result.reasonsEligible || []).length > 0 && (
                       <div className="bg-emerald-50/70 dark:bg-emerald-950/40 p-3.5 rounded-xl border border-emerald-200/80 dark:border-emerald-800/60 space-y-1.5">
                         <div className="flex items-center space-x-1.5 text-xs font-bold text-emerald-800 dark:text-emerald-300">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                           <span>{t.whyEligibleTitle}:</span>
                         </div>
                         <ul className="space-y-1 pl-5 list-disc text-xs text-emerald-900 dark:text-emerald-200 leading-relaxed">
-                          {result.reasonsEligible.map((reason, idx) => (
+                          {(result.reasonsEligible || []).map((reason, idx) => (
                             <li key={idx}>{reason}</li>
                           ))}
                         </ul>
@@ -464,14 +464,14 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                     )}
 
                     {/* Ineligible Reasons */}
-                    {result.reasonsNotEligible.length > 0 && (
+                    {(result.reasonsNotEligible || []).length > 0 && (
                       <div className="bg-rose-50/70 dark:bg-rose-950/40 p-3.5 rounded-xl border border-rose-200/80 dark:border-rose-800/60 space-y-1.5">
                         <div className="flex items-center space-x-1.5 text-xs font-bold text-rose-800 dark:text-rose-300">
                           <XCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
                           <span>{t.whyNotEligibleTitle}:</span>
                         </div>
                         <ul className="space-y-1 pl-5 list-disc text-xs text-rose-900 dark:text-rose-200 leading-relaxed">
-                          {result.reasonsNotEligible.map((reason, idx) => (
+                          {(result.reasonsNotEligible || []).map((reason, idx) => (
                             <li key={idx}>{reason}</li>
                           ))}
                         </ul>
@@ -479,14 +479,14 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                     )}
 
                     {/* Potential Blockers / Conditions */}
-                    {result.potentialBlockers.length > 0 && (
+                    {(result.potentialBlockers || []).length > 0 && (
                       <div className="bg-amber-50/70 dark:bg-amber-950/40 p-3.5 rounded-xl border border-amber-200/80 dark:border-amber-800/60 space-y-1.5">
                         <div className="flex items-center space-x-1.5 text-xs font-bold text-amber-800 dark:text-amber-300">
                           <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                           <span>{t.potentialBlockersTitle}:</span>
                         </div>
                         <ul className="space-y-1 pl-5 list-disc text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
-                          {result.potentialBlockers.map((blocker, idx) => (
+                          {(result.potentialBlockers || []).map((blocker, idx) => (
                             <li key={idx}>{blocker}</li>
                           ))}
                         </ul>
@@ -626,7 +626,7 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                       </div>
 
                       <div className="text-[11px] text-slate-500 dark:text-slate-400 pt-1">
-                        Required Documents ({scheme.documents.length}): {scheme.documents.map(d => d.title).join(', ')}
+                        Required Documents ({(scheme.documents || []).length}): {(scheme.documents || []).map(d => d.title).join(', ')}
                       </div>
                     </div>
                   )}

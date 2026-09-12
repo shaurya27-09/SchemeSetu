@@ -188,12 +188,68 @@ export interface ChannelPartnerBranch {
   isDemoData: boolean;
 }
 
+export type UserRole = 'user' | 'admin';
+
 export interface UserAccount {
   id: string;
   email: string;
-  role: 'user' | 'entrepreneur';
+  role: UserRole;
   name: string;
   createdAt: string;
+}
+
+export interface Agency {
+  id: string;
+  code: 'NSFDC' | 'NBCFDC' | 'NSKFDC' | string;
+  name: string;
+  fullName: string;
+  website: string;
+  description: string;
+}
+
+export interface SchemeSource {
+  id?: string;
+  schemeId?: string;
+  sourceName: string;
+  officialUrl: string;
+  effectiveFrom: string;
+  effectiveTo?: string;
+  lastVerifiedAt: string;
+  isVerified: boolean;
+}
+
+export type RuleField = 
+  | 'beneficiary_category'
+  | 'annual_family_income'
+  | 'age'
+  | 'gender'
+  | 'project_cost'
+  | 'requested_loan_amount'
+  | 'business_sector'
+  | 'education'
+  | 'state'
+  | 'training';
+
+export type RuleOperator = 
+  | 'equals'
+  | 'not_equals'
+  | 'in'
+  | 'not_in'
+  | 'greater_than'
+  | 'greater_than_equal'
+  | 'less_than'
+  | 'less_than_equal'
+  | 'between';
+
+export interface DynamicEligibilityRule {
+  id: string;
+  field: RuleField;
+  operator: RuleOperator;
+  value: string;
+  mandatory: boolean;
+  weight: number;
+  failureMessage: string;
+  failureMessageHi?: string;
 }
 
 export interface TestResult {
@@ -207,3 +263,4 @@ export interface TestResult {
     message?: string;
   }[];
 }
+

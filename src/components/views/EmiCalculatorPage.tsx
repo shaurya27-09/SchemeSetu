@@ -84,15 +84,24 @@ export const EmiCalculatorPage: React.FC<EmiCalculatorPageProps> = ({
       interestAccruesDuringMoratorium: false
     }).then(res => {
       if (!active) return;
+      const fullComputed = calculateEmi({
+        principal: res.principal,
+        annualRate: res.annualRate,
+        tenureYears: Math.max(0.25, res.tenureMonths / 12),
+        moratoriumMonths: res.moratoriumMonths
+      });
       setRpcResult({
+        ...fullComputed,
         principal: res.principal,
         annualRate: res.annualRate,
         tenureYears: Math.round(res.tenureMonths / 12),
         moratoriumMonths: res.moratoriumMonths,
-        monthlyEmi: res.monthlyEmi,
-        totalInterest: res.totalInterest,
-        totalRepayment: res.totalRepayment,
-        disclaimer: res.disclaimer
+        monthlyEmi: res.monthlyEmi || fullComputed.monthlyEmi,
+        totalInterest: res.totalInterest || fullComputed.totalInterest,
+        totalRepayment: res.totalRepayment || fullComputed.totalRepayment,
+        disclaimer: res.disclaimer || fullComputed.disclaimer,
+        yearlySummary: fullComputed.yearlySummary || [],
+        schedule: fullComputed.schedule || []
       });
       setIsRpcActive(true);
       setIsRpcLoading(false);
@@ -341,7 +350,7 @@ export const EmiCalculatorPage: React.FC<EmiCalculatorPageProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {emiResult.yearlySummary.map((row) => (
+                  {(emiResult.yearlySummary || []).map((row) => (
                     <tr key={row.year} className="hover:bg-slate-50 dark:hover:bg-slate-850">
                       <td className="py-2 font-bold text-slate-700 dark:text-slate-300">Year {row.year}</td>
                       <td className="py-2 text-slate-900 dark:text-white">{formatIndianCurrency(row.principalPaid)}</td>

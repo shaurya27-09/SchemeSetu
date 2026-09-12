@@ -19,14 +19,24 @@ import { SavedSchemesView } from './components/views/SavedSchemesView';
 import { SchemeMitraModal } from './components/views/SchemeMitraModal';
 import { AuthModal } from './components/auth/AuthModal';
 import { UserProfileModal } from './components/profile/UserProfileModal';
+import { AdminRoute } from './components/auth/AdminRoute';
+import { AdminDashboard } from './components/admin/AdminDashboard';
+import { AddSchemeForm } from './components/admin/AddSchemeForm';
 
 import { ApplicantProfile, Scheme } from './types';
 import { Language } from './utils/translations';
 import { dataStore } from './services/dataStore';
 import { Sparkles } from 'lucide-react';
 
+const getInitialView = (): string => {
+  const path = typeof window !== 'undefined' ? window.location.pathname : '/';
+  if (path === '/admin' || path === '/admin/') return 'admin';
+  if (path === '/admin/schemes/new' || path === '/admin/schemes/new/') return 'admin_new_scheme';
+  return 'landing';
+};
+
 export default function App() {
-  const [currentView, setCurrentView] = useState<string>('landing');
+  const [currentView, setCurrentView] = useState<string>(getInitialView);
   const [language, setLanguage] = useState<Language>('en');
   
   // Profile state
@@ -48,16 +58,52 @@ export default function App() {
     return all.slice(0, 2); // default compare two schemes
   });
 
+  // Sync URL with currentView for /admin and /admin/schemes/new
+  const handleNavigate = (view: string) => {
+    setCurrentView(view);
+    if (typeof window !== 'undefined') {
+      if (view === 'admin') {
+        if (window.location.pathname !== '/admin') {
+          window.history.pushState({}, '', '/admin');
+        }
+      } else if (view === 'admin_new_scheme') {
+        if (window.location.pathname !== '/admin/schemes/new') {
+          window.history.pushState({}, '', '/admin/schemes/new');
+        }
+      } else {
+        if (window.location.pathname.startsWith('/admin')) {
+          window.history.pushState({}, '', '/');
+        }
+      }
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Browser back/forward navigation sync
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      if (path === '/admin' || path === '/admin/') {
+        setCurrentView('admin');
+      } else if (path === '/admin/schemes/new' || path === '/admin/schemes/new/') {
+        setCurrentView('admin_new_scheme');
+      } else {
+        setCurrentView(prev => (prev.startsWith('admin') ? 'landing' : prev));
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const handleCompleteWizard = (profile: ApplicantProfile) => {
     setApplicantProfile(profile);
     dataStore.saveProfile(profile);
-    setCurrentView('results');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    handleNavigate('results');
   };
 
   const handleAddToCompare = (scheme: Scheme) => {
     if (comparedSchemes.find(s => s.id === scheme.id)) {
-      setCurrentView('compare');
+      handleNavigate('compare');
       return;
     }
     if (comparedSchemes.length >= 3) {
@@ -65,8 +111,7 @@ export default function App() {
     } else {
       setComparedSchemes([...comparedSchemes, scheme]);
     }
-    setCurrentView('compare');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    handleNavigate('compare');
   };
 
   const handleRemoveFromCompare = (schemeId: string) => {
@@ -75,19 +120,16 @@ export default function App() {
 
   const handleOpenChecklist = (scheme: Scheme) => {
     setActiveSchemeForChecklist(scheme);
-    setCurrentView('documents');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    handleNavigate('documents');
   };
 
   const handleOpenEmi = (scheme: Scheme) => {
     setActiveSchemeForEmi(scheme);
-    setCurrentView('emi');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    handleNavigate('emi');
   };
 
   const handleOpenLocator = (scheme: Scheme) => {
-    setCurrentView('branches');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    handleNavigate('branches');
   };
 
   return (
@@ -95,10 +137,7 @@ export default function App() {
       {/* Navigation Bar */}
       <Navbar
         currentView={currentView}
-        setCurrentView={(view) => {
-          setCurrentView(view);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
+        setCurrentView={handleNavigate}
         language={language}
         setLanguage={setLanguage}
         onOpenMitra={() => setIsMitraOpen(true)}
@@ -111,10 +150,7 @@ export default function App() {
         {currentView === 'landing' && (
           <LandingPage
             language={language}
-            onNavigate={(view) => {
-              setCurrentView(view);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
+            onNavigate={handleNavigate}
             onOpenMitra={() => setIsMitraOpen(true)}
           />
         )}
@@ -182,12 +218,14 @@ export default function App() {
         {currentView === 'compare' && (
           <SchemeCompare
             language={language}
+            selectedSchemes={comparedSchemes}
             comparedSchemes={comparedSchemes}
+            onAddScheme={handleAddToCompare}
             onRemoveScheme={handleRemoveFromCompare}
             onSelectSchemeDetails={(scheme) => setModalScheme(scheme)}
             onOpenChecklist={handleOpenChecklist}
             onOpenLocator={handleOpenLocator}
-            onExploreSchemes={() => setCurrentView('schemes')}
+            onExploreSchemes={() => handleNavigate('schemes')}
           />
         )}
 
@@ -212,6 +250,38 @@ export default function App() {
             language={language}
           />
         )}
+
+        {/* Admin Portal Dashboard (/admin) */}
+        {currentView === 'admin' && (
+          <AdminRoute
+            language={language}
+            onNavigateHome={() => handleNavigate('landing')}
+            onOpenAuth={() => setIsAuthOpen(true)}
+          >
+            <AdminDashboard
+              language={language}
+              onNavigateAddScheme={() => handleNavigate('admin_new_scheme')}
+              onSelectScheme={(scheme) => setModalScheme(scheme)}
+            />
+          </AdminRoute>
+        )}
+
+        {/* Admin Add Scheme (/admin/schemes/new) */}
+        {currentView === 'admin_new_scheme' && (
+          <AdminRoute
+            language={language}
+            onNavigateHome={() => handleNavigate('landing')}
+            onOpenAuth={() => setIsAuthOpen(true)}
+          >
+            <AddSchemeForm
+              language={language}
+              onBackToDashboard={() => handleNavigate('admin')}
+              onSchemeCreated={(newScheme) => {
+                setModalScheme(newScheme);
+              }}
+            />
+          </AdminRoute>
+        )}
       </main>
 
       {/* Floating Action Button for Scheme Mitra AI on mobile / bottom right */}
@@ -229,10 +299,7 @@ export default function App() {
       <UserProfileModal
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
-        onNavigate={(view) => {
-          setCurrentView(view);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
+        onNavigate={handleNavigate}
       />
 
       {/* Authentication Modal */}
@@ -262,10 +329,7 @@ export default function App() {
       {/* Footer */}
       <Footer
         language={language}
-        onNavigate={(view) => {
-          setCurrentView(view);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
+        onNavigate={handleNavigate}
       />
     </div>
   );

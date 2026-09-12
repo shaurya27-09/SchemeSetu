@@ -12,14 +12,40 @@ export function evaluateSchemeEligibility(
   scheme: Scheme,
   whatIfOverrides?: WhatIfParams
 ): EligibilityResult {
-  const rules = scheme.rules;
-  const terms = scheme.terms;
+  const rules = scheme?.rules || {
+    minAge: 18,
+    maxAge: 60,
+    maxAnnualIncome: 0,
+    minProjectCost: 0,
+    maxProjectCost: 50000000,
+    maxLoanAmount: 50000000,
+    personalContributionMinPercent: 0,
+    eligibleCategories: ['SC', 'OBC', 'SafaiKaramchari', 'DNT_NT', 'EBC', 'General'],
+    eligibleGenders: ['male', 'female', 'other'],
+    mandatoryTrainingRequired: false,
+    eligibleSectors: [] as string[],
+    specialConditionsNotes: '',
+    effectiveFrom: '2026-01-01',
+    lastVerifiedAt: '2026-01-01'
+  };
+  const terms = scheme?.terms || {
+    interestRateMin: 4,
+    interestRateMax: 8,
+    rebateForWomenPercent: 1,
+    tenureYearsMax: 7,
+    moratoriumMonths: 6,
+    subsidyRatePercent: 0
+  };
+
+  const eligibleCategories = rules.eligibleCategories || [];
+  const eligibleGenders = rules.eligibleGenders || [];
+  const eligibleSectors = rules.eligibleSectors || [];
 
   // Active values (with What-If simulation support)
   const effectiveProjectCost = whatIfOverrides ? whatIfOverrides.projectCost : profile.projectCost;
   const effectiveLoanAmount = whatIfOverrides ? whatIfOverrides.requestedLoanAmount : profile.requestedLoanAmount;
   const effectiveContribution = whatIfOverrides ? whatIfOverrides.personalContribution : profile.personalContribution;
-  const effectiveTenureYears = whatIfOverrides ? whatIfOverrides.tenureYears : Math.min(terms.tenureYearsMax, 7);
+  const effectiveTenureYears = whatIfOverrides ? whatIfOverrides.tenureYears : Math.min(terms.tenureYearsMax || 7, 7);
 
   const reasonsEligible: string[] = [];
   const reasonsNotEligible: string[] = [];
@@ -31,13 +57,13 @@ export function evaluateSchemeEligibility(
   let categoryPassed = false;
   let categoryMessage = "";
 
-  if (rules.eligibleCategories.includes(profile.category)) {
+  if (eligibleCategories.includes(profile.category)) {
     categoryPassed = true;
     categoryMessage = `Your category (${getCategoryLabel(profile.category)}) matches the target group for ${scheme.corporation}.`;
     reasonsEligible.push(`Beneficiary category satisfied: ${getCategoryLabel(profile.category)} is eligible under ${scheme.corporation}.`);
   } else {
     categoryPassed = false;
-    const allowed = rules.eligibleCategories.map(getCategoryLabel).join(', ');
+    const allowed = eligibleCategories.map(getCategoryLabel).join(', ');
     categoryMessage = `Scheme requires applicant category to be [${allowed}], but profile category is ${getCategoryLabel(profile.category)}.`;
     reasonsNotEligible.push(`Category mismatch: Scheme is designated for ${allowed}, whereas applicant is registered as ${getCategoryLabel(profile.category)}.`);
   }
@@ -129,16 +155,16 @@ export function evaluateSchemeEligibility(
   let genderPassed = false;
   let genderMessage = "";
 
-  if (rules.eligibleGenders.includes(profile.gender)) {
+  if (eligibleGenders.length === 0 || eligibleGenders.includes(profile.gender)) {
     genderPassed = true;
     genderMessage = `Gender (${profile.gender}) is eligible for this program.`;
-    if (rules.eligibleGenders.length === 1 && rules.eligibleGenders[0] === 'female') {
+    if (eligibleGenders.length === 1 && eligibleGenders[0] === 'female') {
       reasonsEligible.push("Special Women-Exclusive Scheme: Tailored benefits and zero promoter contribution for women entrepreneurs.");
     }
   } else {
     genderPassed = false;
-    genderMessage = `This scheme is exclusively reserved for ${rules.eligibleGenders.join(', ')} applicants.`;
-    reasonsNotEligible.push(`Gender restriction: This scheme is earmarked exclusively for ${rules.eligibleGenders.join(', ')} beneficiaries.`);
+    genderMessage = `This scheme is exclusively reserved for ${eligibleGenders.join(', ')} applicants.`;
+    reasonsNotEligible.push(`Gender restriction: This scheme is earmarked exclusively for ${eligibleGenders.join(', ')} beneficiaries.`);
   }
 
   // ========================================================
@@ -147,10 +173,13 @@ export function evaluateSchemeEligibility(
   let sectorPassed = true;
   let sectorMessage = "Sector is permissible under broad self-employment guidelines.";
 
-  if (rules.eligibleSectors && rules.eligibleSectors.length > 0) {
-    const sectorMatch = rules.eligibleSectors.some(s => 
-      s.toLowerCase().includes(profile.businessSector.toLowerCase()) ||
-      profile.businessSector.toLowerCase().includes(s.toLowerCase())
+  if (eligibleSectors && eligibleSectors.length > 0) {
+    const businessSector = (profile.businessSector || '').toLowerCase();
+    const sectorMatch = eligibleSectors.some(s => 
+      s && (
+        s.toLowerCase().includes(businessSector) ||
+        businessSector.includes(s.toLowerCase())
+      )
     );
     if (sectorMatch) {
       sectorPassed = true;

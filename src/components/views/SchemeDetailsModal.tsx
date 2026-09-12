@@ -172,43 +172,47 @@ export const SchemeDetailsModal: React.FC<SchemeDetailsModalProps> = ({
           </div>
 
           {/* Key Advantages & Special Benefits */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-              Special Program Benefits
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {scheme.specialBenefits.map((benefit, idx) => (
-                <div key={idx} className="flex items-start space-x-2 text-xs text-slate-700 dark:text-slate-200 p-2.5 rounded-lg bg-emerald-50/50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-800/60">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                  <span>{benefit}</span>
-                </div>
-              ))}
+          {(scheme.specialBenefits || []).length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                Special Program Benefits
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {(scheme.specialBenefits || []).map((benefit, idx) => (
+                  <div key={idx} className="flex items-start space-x-2 text-xs text-slate-700 dark:text-slate-200 p-2.5 rounded-lg bg-emerald-50/50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-800/60">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                    <span>{benefit}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Step-by-Step Application Workflow */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-              Standard Application & Sanction Workflow
-            </h3>
-            <div className="space-y-2">
-              {scheme.applicationProcess.map((step, idx) => (
-                <div key={idx} className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs flex items-start space-x-3 bg-white dark:bg-slate-850">
-                  <span className="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">
-                    {idx + 1}
-                  </span>
-                  <span className="text-slate-700 dark:text-slate-200">{step}</span>
-                </div>
-              ))}
+          {(scheme.applicationProcess || []).length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                Standard Application & Sanction Workflow
+              </h3>
+              <div className="space-y-2">
+                {(scheme.applicationProcess || []).map((step, idx) => (
+                  <div key={idx} className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs flex items-start space-x-3 bg-white dark:bg-slate-850">
+                    <span className="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5">
+                      {idx + 1}
+                    </span>
+                    <span className="text-slate-700 dark:text-slate-200">{step}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Channel Partners & Branch Locations */}
           <div className="p-4 bg-slate-50 dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h4 className="text-xs font-bold text-slate-900 dark:text-white">Participating Channelising Agencies:</h4>
               <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
-                {scheme.channelPartners.join(' • ')}
+                {(scheme.channelPartners || []).join(' • ') || 'State Channelising Agencies (SCAs) & Scheduled Banks'}
               </p>
             </div>
             <button

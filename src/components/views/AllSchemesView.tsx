@@ -210,31 +210,31 @@ export const AllSchemesView: React.FC<AllSchemesViewProps> = ({
               <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
                 <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
                   <span className="text-[11px] text-slate-400 dark:text-slate-400 block">Interest Rate:</span>
-                  <span className="font-bold text-emerald-700 dark:text-emerald-400">{scheme.terms.interestRateMin}% – {scheme.terms.interestRateMax}%</span>
+                  <span className="font-bold text-emerald-700 dark:text-emerald-400">{scheme.terms?.interestRateMin ?? 4}% – {scheme.terms?.interestRateMax ?? 8}%</span>
                 </div>
                 <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
                   <span className="text-[11px] text-slate-400 dark:text-slate-400 block">Max Loan:</span>
-                  <span className="font-bold text-slate-900 dark:text-white">{formatIndianCurrency(scheme.rules.maxLoanAmount, true)}</span>
+                  <span className="font-bold text-slate-900 dark:text-white">{formatIndianCurrency(scheme.rules?.maxLoanAmount ?? 500000, true)}</span>
                 </div>
               </div>
 
               {/* Concession tags */}
               <div className="flex flex-wrap gap-1.5 pt-1">
-                {scheme.terms.rebateForWomenPercent > 0 && (
+                {(scheme.terms?.rebateForWomenPercent ?? 0) > 0 && (
                   <span className="text-[10px] font-bold bg-pink-50 dark:bg-pink-950/60 text-pink-700 dark:text-pink-300 px-2 py-0.5 rounded-md border border-pink-100 dark:border-pink-900/60">
-                    {scheme.terms.rebateForWomenPercent}% Women Rebate
+                    {scheme.terms?.rebateForWomenPercent}% Women Rebate
                   </span>
                 )}
                 <span className="text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-md">
-                  {scheme.terms.tenureYearsMax} Yrs Tenure
+                  {scheme.terms?.tenureYearsMax ?? 5} Yrs Tenure
                 </span>
-                {scheme.rules.maxAnnualIncome === 0 ? (
+                {scheme.rules?.maxAnnualIncome === 0 ? (
                   <span className="text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-md">
                     No Income Ceiling
                   </span>
                 ) : (
                   <span className="text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-md">
-                    Ceiling: {formatIndianCurrency(scheme.rules.maxAnnualIncome, true)}
+                    Ceiling: {formatIndianCurrency(scheme.rules?.maxAnnualIncome ?? 300000, true)}
                   </span>
                 )}
               </div>

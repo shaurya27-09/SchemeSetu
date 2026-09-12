@@ -6,8 +6,11 @@ import {
   SchemeTerms, 
   SchemeDocument, 
   EligibilityResult,
-  ChannelPartnerBranch
+  ChannelPartnerBranch,
+  Agency,
+  SchemeSource
 } from '../types';
+
 import { INITIAL_SCHEMES, INITIAL_BRANCHES } from '../data/seedSchemes';
 
 // In-memory lookup caches to prevent redundant network requests (STEP 4)
@@ -547,3 +550,340 @@ export async function getBranchesFromDb(state?: string): Promise<ChannelPartnerB
 
   return INITIAL_BRANCHES;
 }
+
+// ============================================================================
+// 8. ADMIN SCHEME MANAGEMENT (STEP 13 & 14)
+// ============================================================================
+
+export const DEFAULT_AGENCIES: Agency[] = [
+  {
+    id: 'agency-nsfdc',
+    code: 'NSFDC',
+    name: 'NSFDC',
+    fullName: 'National Scheduled Castes Finance and Development Corporation',
+    website: 'https://nsfdc.nic.in',
+    description: 'Statutory corporation for financing self-employment of Scheduled Castes.'
+  },
+  {
+    id: 'agency-nbcfdc',
+    code: 'NBCFDC',
+    name: 'NBCFDC',
+    fullName: 'National Backward Classes Finance and Development Corporation',
+    website: 'https://nbcfdc.gov.in',
+    description: 'Promoting economic empowerment of Other Backward Classes.'
+  },
+  {
+    id: 'agency-nskfdc',
+    code: 'NSKFDC',
+    name: 'NSKFDC',
+    fullName: 'National Safai Karamcharis Finance and Development Corporation',
+    website: 'https://nskfdc.nic.in',
+    description: 'Concessional finance for Safai Karamcharis, manual scavengers, and dependents.'
+  }
+];
+
+/**
+ * Fetch list of official agencies from Supabase `agencies` table or statutory defaults
+ */
+export async function getAgenciesFromDb(): Promise<Agency[]> {
+  try {
+    const { data, error } = await supabase
+      .from('agencies')
+      .select('*')
+      .order('code', { ascending: true });
+
+    if (!error && data && data.length > 0) {
+      return data.map((a: any) => ({
+        id: a.id,
+        code: a.code,
+        name: a.name || a.code,
+        fullName: a.full_name || a.name || a.code,
+        website: a.website || '',
+        description: a.description || ''
+      }));
+    }
+  } catch (err) {
+    console.warn('[SupabaseService] getAgenciesFromDb fallback:', err);
+  }
+  return DEFAULT_AGENCIES;
+}
+
+export interface CreateSchemePayload {
+  scheme: {
+    code: string;
+    name: string;
+    nameHi?: string;
+    corporation: 'NSFDC' | 'NBCFDC' | 'NSKFDC';
+    corporationFullName?: string;
+    targetGroup?: string;
+    targetGroupHi?: string;
+    description: string;
+    descriptionHi?: string;
+    specialBenefits?: string[];
+    specialBenefitsHi?: string[];
+    applicationProcess?: string[];
+    applicationProcessHi?: string[];
+    channelPartners?: string[];
+    sourceUrl?: string;
+    sourceName?: string;
+    effectiveFrom?: string;
+    lastVerifiedAt?: string;
+    active: boolean;
+    isDemoData?: boolean;
+  };
+  terms: {
+    interestRateMin: number;
+    interestRateMax: number;
+    rebateForWomenPercent?: number;
+    tenureYearsMax: number;
+    moratoriumMonths: number;
+    subsidyRatePercent?: number;
+  };
+  rules: {
+    minAge: number;
+    maxAge: number;
+    maxAnnualIncome: number;
+    minProjectCost: number;
+    maxProjectCost: number;
+    maxLoanAmount: number;
+    personalContributionMinPercent: number;
+    eligibleCategories: string[];
+    eligibleGenders: string[];
+    eligibleStates?: string[];
+    eligibleSectors?: string[];
+    mandatoryTrainingRequired?: boolean;
+    specialConditionsNotes?: string;
+    effectiveFrom?: string;
+    lastVerifiedAt?: string;
+  };
+  documents?: Array<{
+    code: string;
+    title: string;
+    titleHi?: string;
+    description?: string;
+    descriptionHi?: string;
+    requirementType: 'required' | 'conditional' | 'optional';
+    conditionNote?: string;
+  }>;
+  source?: {
+    sourceName: string;
+    officialUrl: string;
+    effectiveFrom: string;
+    effectiveTo?: string;
+    lastVerifiedAt: string;
+    isVerified: boolean;
+  };
+}
+
+/**
+ * Creates a scheme atomically across Supabase tables:
+ * schemes, scheme_terms, scheme_rules, scheme_documents, scheme_sources
+ * Protected by Row Level Security so only users with role: 'admin' can succeed.
+ */
+export async function createSchemeAdmin(payload: CreateSchemePayload): Promise<{
+  success: boolean;
+  schemeId?: string;
+  error?: string;
+  createdScheme?: Scheme;
+}> {
+  try {
+    // 1. First attempt atomic RPC function
+    try {
+      const { data: rpcData, error: rpcError } = await supabase.rpc('create_scheme_atomic', {
+        p_scheme: {
+          code: payload.scheme.code,
+          name: payload.scheme.name,
+          name_hi: payload.scheme.nameHi || payload.scheme.name,
+          corporation: payload.scheme.corporation,
+          corporation_full_name: payload.scheme.corporationFullName || `${payload.scheme.corporation} Apex Corporation`,
+          targetGroup: payload.scheme.targetGroup || 'Affirmative Beneficiaries',
+          targetGroupHi: payload.scheme.targetGroupHi || 'लक्षित लाभार्थी',
+          description: payload.scheme.description,
+          description_hi: payload.scheme.descriptionHi || payload.scheme.description,
+          special_benefits: payload.scheme.specialBenefits || [],
+          special_benefits_hi: payload.scheme.specialBenefitsHi || [],
+          application_process: payload.scheme.applicationProcess || [],
+          application_process_hi: payload.scheme.applicationProcessHi || [],
+          channel_partners: payload.scheme.channelPartners || ['State Channelising Agencies (SCAs)'],
+          source_url: payload.source?.officialUrl || payload.scheme.sourceUrl,
+          source_name: payload.source?.sourceName || payload.scheme.sourceName,
+          effective_from: payload.source?.effectiveFrom || payload.scheme.effectiveFrom,
+          last_verified_at: payload.source?.lastVerifiedAt || payload.scheme.lastVerifiedAt,
+          active: payload.scheme.active,
+          is_demo_data: false
+        },
+        p_terms: {
+          interest_rate_min: payload.terms.interestRateMin,
+          interest_rate_max: payload.terms.interestRateMax,
+          rebate_for_women_percent: payload.terms.rebateForWomenPercent || 1.0,
+          tenure_years_max: payload.terms.tenureYearsMax,
+          moratorium_months: payload.terms.moratoriumMonths,
+          subsidy_rate_percent: payload.terms.subsidyRatePercent || 0
+        },
+        p_rules: {
+          min_age: payload.rules.minAge,
+          max_age: payload.rules.maxAge,
+          max_annual_income: payload.rules.maxAnnualIncome,
+          min_project_cost: payload.rules.minProjectCost,
+          max_project_cost: payload.rules.maxProjectCost,
+          max_loan_amount: payload.rules.maxLoanAmount,
+          personal_contribution_min_percent: payload.rules.personalContributionMinPercent,
+          eligible_categories: payload.rules.eligibleCategories,
+          eligible_genders: payload.rules.eligibleGenders,
+          eligible_states: payload.rules.eligibleStates || [],
+          eligible_sectors: payload.rules.eligibleSectors || [],
+          mandatory_training_required: payload.rules.mandatoryTrainingRequired || false,
+          special_conditions_notes: payload.rules.specialConditionsNotes || '',
+          effective_from: payload.rules.effectiveFrom || payload.scheme.effectiveFrom,
+          last_verified_at: payload.rules.lastVerifiedAt || payload.scheme.lastVerifiedAt
+        },
+        p_documents: (payload.documents || []).map(d => ({
+          code: d.code,
+          title: d.title,
+          title_hi: d.titleHi || d.title,
+          description: d.description || '',
+          description_hi: d.descriptionHi || '',
+          requirement_type: d.requirementType,
+          condition_note: d.conditionNote
+        })),
+        p_source: payload.source ? {
+          source_name: payload.source.sourceName,
+          official_url: payload.source.officialUrl,
+          effective_from: payload.source.effectiveFrom,
+          effective_to: payload.source.effectiveTo || null,
+          last_verified_at: payload.source.lastVerifiedAt,
+          is_verified: payload.source.isVerified
+        } : null
+      });
+
+      if (!rpcError && rpcData?.scheme_id) {
+        return {
+          success: true,
+          schemeId: rpcData.scheme_id
+        };
+      }
+    } catch (rpcEx) {
+      console.warn('[SupabaseService] RPC create_scheme_atomic attempt error, falling back to direct table inserts:', rpcEx);
+    }
+
+    // 2. Direct transactional sequence
+    const generatedId = `scheme-${Date.now()}`;
+    const { data: schemeData, error: schemeError } = await supabase
+      .from('schemes')
+      .insert({
+        code: payload.scheme.code,
+        name: payload.scheme.name,
+        name_hi: payload.scheme.nameHi || payload.scheme.name,
+        corporation: payload.scheme.corporation,
+        corporation_full_name: payload.scheme.corporationFullName || `${payload.scheme.corporation} Apex Corporation`,
+        target_group: payload.scheme.targetGroup || 'Affirmative Beneficiaries',
+        target_group_hi: payload.scheme.targetGroupHi || 'लक्षित लाभार्थी',
+        description: payload.scheme.description,
+        description_hi: payload.scheme.descriptionHi || payload.scheme.description,
+        special_benefits: payload.scheme.specialBenefits || [],
+        special_benefits_hi: payload.scheme.specialBenefitsHi || [],
+        application_process: payload.scheme.applicationProcess || [],
+        application_process_hi: payload.scheme.applicationProcessHi || [],
+        channel_partners: payload.scheme.channelPartners || ['State Channelising Agencies (SCAs)'],
+        source_url: payload.source?.officialUrl || payload.scheme.sourceUrl,
+        source_name: payload.source?.sourceName || payload.scheme.sourceName,
+        effective_from: payload.source?.effectiveFrom || payload.scheme.effectiveFrom || new Date().toISOString().split('T')[0],
+        last_verified_at: payload.source?.lastVerifiedAt || payload.scheme.lastVerifiedAt || new Date().toISOString().split('T')[0],
+        active: payload.scheme.active,
+        is_demo_data: false
+      })
+      .select('id')
+      .single();
+
+    if (schemeError) {
+      return { success: false, error: schemeError.message };
+    }
+
+    const newSchemeId = schemeData?.id || generatedId;
+
+    // Insert terms
+    await supabase.from('scheme_terms').insert({
+      scheme_id: newSchemeId,
+      interest_rate_min: payload.terms.interestRateMin,
+      interest_rate_max: payload.terms.interestRateMax,
+      rebate_for_women_percent: payload.terms.rebateForWomenPercent ?? 1.0,
+      tenure_years_max: payload.terms.tenureYearsMax,
+      moratorium_months: payload.terms.moratoriumMonths,
+      subsidy_rate_percent: payload.terms.subsidyRatePercent ?? 0
+    });
+
+    // Insert rules
+    await supabase.from('scheme_rules').insert({
+      scheme_id: newSchemeId,
+      min_age: payload.rules.minAge,
+      max_age: payload.rules.maxAge,
+      max_annual_income: payload.rules.maxAnnualIncome,
+      min_project_cost: payload.rules.minProjectCost,
+      max_project_cost: payload.rules.maxProjectCost,
+      max_loan_amount: payload.rules.maxLoanAmount,
+      personal_contribution_min_percent: payload.rules.personalContributionMinPercent,
+      eligible_categories: payload.rules.eligibleCategories,
+      eligible_genders: payload.rules.eligibleGenders,
+      eligible_states: payload.rules.eligibleStates || [],
+      eligible_sectors: payload.rules.eligibleSectors || [],
+      mandatory_training_required: payload.rules.mandatoryTrainingRequired ?? false,
+      special_conditions_notes: payload.rules.specialConditionsNotes || '',
+      effective_from: payload.rules.effectiveFrom || new Date().toISOString().split('T')[0],
+      last_verified_at: payload.rules.lastVerifiedAt || new Date().toISOString().split('T')[0]
+    });
+
+    // Insert documents
+    if (payload.documents && payload.documents.length > 0) {
+      const docRows = payload.documents.map(d => ({
+        scheme_id: newSchemeId,
+        code: d.code,
+        title: d.title,
+        title_hi: d.titleHi || d.title,
+        description: d.description || '',
+        description_hi: d.descriptionHi || '',
+        requirement_type: d.requirementType,
+        condition_note: d.conditionNote
+      }));
+      await supabase.from('scheme_documents').insert(docRows);
+    }
+
+    // Insert source
+    if (payload.source) {
+      await supabase.from('scheme_sources').insert({
+        scheme_id: newSchemeId,
+        source_name: payload.source.sourceName,
+        official_url: payload.source.officialUrl,
+        effective_from: payload.source.effectiveFrom,
+        effective_to: payload.source.effectiveTo || null,
+        last_verified_at: payload.source.lastVerifiedAt,
+        is_verified: payload.source.isVerified
+      });
+    }
+
+    return { success: true, schemeId: newSchemeId };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'An unexpected error occurred while saving the scheme.' };
+  }
+}
+
+/**
+ * Updates a scheme's active/inactive status in Supabase
+ */
+export async function updateSchemeAdminStatus(schemeId: string, active: boolean): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('schemes')
+      .update({ active, updated_at: new Date().toISOString() })
+      .eq('id', schemeId);
+
+    if (error) {
+      console.warn('[SupabaseService] updateSchemeAdminStatus error:', error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn('[SupabaseService] updateSchemeAdminStatus note:', err);
+    return false;
+  }
+}
+
