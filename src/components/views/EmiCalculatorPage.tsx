@@ -274,7 +274,7 @@ export const EmiCalculatorPage: React.FC<EmiCalculatorPageProps> = ({
           </div>
 
           {/* Mathematical Formula Footnote */}
-          <div className="p-3 bg-slate-50 dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400 font-mono">
+          <div className="p-3 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 text-[11px] text-slate-600 dark:text-slate-300 font-mono">
             <strong>Standard Reducing Formula:</strong><br />
             r = rate / 12 / 100, n = tenure_months<br />
             EMI = [P × r × (1+r)ⁿ] / [(1+r)ⁿ - 1]
@@ -351,7 +351,7 @@ export const EmiCalculatorPage: React.FC<EmiCalculatorPageProps> = ({
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {(emiResult.yearlySummary || []).map((row) => (
-                    <tr key={row.year} className="hover:bg-slate-50 dark:hover:bg-slate-850">
+                    <tr key={row.year} className="hover:bg-slate-50 dark:hover:bg-slate-800">
                       <td className="py-2 font-bold text-slate-700 dark:text-slate-300">Year {row.year}</td>
                       <td className="py-2 text-slate-900 dark:text-white">{formatIndianCurrency(row.principalPaid)}</td>
                       <td className="py-2 text-emerald-700 dark:text-emerald-400 font-medium">{formatIndianCurrency(row.interestPaid)}</td>

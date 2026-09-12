@@ -197,8 +197,8 @@ export const BranchLocatorView: React.FC<BranchLocatorViewProps> = ({ language }
                 onClick={() => setSelectedBranch(branch)}
                 className={`p-5 rounded-2xl border cursor-pointer transition ${
                   isSelected 
-                    ? 'border-indigo-600 dark:border-indigo-500 bg-indigo-50/40 dark:bg-indigo-950/40 shadow-sm' 
-                    : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700'
+                    ? 'border-indigo-600 dark:border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/40 shadow-sm' 
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-600'
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -316,8 +316,8 @@ export const BranchLocatorView: React.FC<BranchLocatorViewProps> = ({ language }
                 </div>
               </div>
 
-              <div className="p-3 bg-slate-50 dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300">
-                <span className="font-bold text-slate-800 dark:text-slate-200">Assigned Nodal Officer: </span>
+              <div className="p-3 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300">
+                <span className="font-bold text-slate-900 dark:text-white">Assigned Nodal Officer: </span>
                 {selectedBranch.contactPerson} (Assistance for Loan Application & Dossier Submission)
               </div>
             </div>

@@ -579,7 +579,7 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
 
                   {/* Expandable Deterministic Rule Breakdown */}
                   {isExpanded && (
-                    <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-800 text-xs space-y-3">
+                    <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 text-xs space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[11px]">
                           Deterministic Rule Engine Audit Breakdown
@@ -590,32 +590,32 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                        <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
-                          <span className="text-slate-400 dark:text-slate-500 block text-[10px]">Beneficiary Target Category</span>
+                        <div className="p-2.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                          <span className="text-slate-500 dark:text-slate-400 block text-[10px]">Beneficiary Target Category</span>
                           <span className="font-semibold text-slate-800 dark:text-slate-200">{scheme.rules.eligibleCategories.join(', ')}</span>
                           <span className="block text-[10px] mt-0.5 text-emerald-600 dark:text-emerald-400 font-medium">
                             Applicant ({profile.category}): {scheme.rules.eligibleCategories.includes(profile.category) ? '✓ Matched' : '✗ Category Ineligible'}
                           </span>
                         </div>
 
-                        <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
-                          <span className="text-slate-400 dark:text-slate-500 block text-[10px]">Age Range Permitted</span>
+                        <div className="p-2.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                          <span className="text-slate-500 dark:text-slate-400 block text-[10px]">Age Range Permitted</span>
                           <span className="font-semibold text-slate-800 dark:text-slate-200">{scheme.rules.minAge} to {scheme.rules.maxAge} years</span>
                           <span className="block text-[10px] mt-0.5 text-emerald-600 dark:text-emerald-400 font-medium">
                             Applicant ({profile.age} yrs): {profile.age >= scheme.rules.minAge && profile.age <= scheme.rules.maxAge ? '✓ Within Limits' : '✗ Out of Range'}
                           </span>
                         </div>
 
-                        <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
-                          <span className="text-slate-400 dark:text-slate-500 block text-[10px]">Max Credit Limit</span>
+                        <div className="p-2.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                          <span className="text-slate-500 dark:text-slate-400 block text-[10px]">Max Credit Limit</span>
                           <span className="font-semibold text-slate-800 dark:text-slate-200">{formatIndianCurrency(scheme.rules.maxLoanAmount, true)}</span>
                           <span className="block text-[10px] mt-0.5 font-medium text-slate-700 dark:text-slate-300">
                             Requested: {formatIndianCurrency(profile.requestedLoanAmount, true)} ({profile.requestedLoanAmount <= scheme.rules.maxLoanAmount ? '✓ Within Limit' : '⚠ Exceeds Scheme Max'})
                           </span>
                         </div>
 
-                        <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
-                          <span className="text-slate-400 dark:text-slate-500 block text-[10px]">Income Ceiling Criteria</span>
+                        <div className="p-2.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                          <span className="text-slate-500 dark:text-slate-400 block text-[10px]">Income Ceiling Criteria</span>
                           <span className="font-semibold text-slate-800 dark:text-slate-200">
                             {scheme.rules.maxAnnualIncome === 0 ? 'No Ceiling (Waiver Active)' : formatIndianCurrency(scheme.rules.maxAnnualIncome, true)}
                           </span>

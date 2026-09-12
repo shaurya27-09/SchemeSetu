@@ -167,12 +167,12 @@ export const SchemeMitraModal: React.FC<SchemeMitraModalProps> = ({
         </div>
 
         {/* Security / Deterministic Notice Banner */}
-        <div className="bg-slate-100 dark:bg-slate-850 px-4 py-2 text-[11px] text-slate-600 dark:text-slate-300 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
+        <div className="bg-slate-100 dark:bg-slate-800 px-4 py-2 text-[11px] text-slate-600 dark:text-slate-300 flex items-center justify-between border-b border-slate-200 dark:border-slate-700">
           <span className="flex items-center space-x-1">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>Answers grounded in verified MoSJE notifications</span>
           </span>
-          <span className="text-slate-400 dark:text-slate-500 font-mono text-[10px]">Server-Side Secure</span>
+          <span className="text-slate-500 dark:text-slate-400 font-mono text-[10px]">Server-Side Secure</span>
         </div>
 
         {/* Chat Messages Log */}
@@ -220,8 +220,8 @@ export const SchemeMitraModal: React.FC<SchemeMitraModalProps> = ({
         </div>
 
         {/* Suggested Quick Prompts */}
-        <div className="p-3 bg-white dark:bg-slate-850 border-t border-slate-200 dark:border-slate-800 space-y-1.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+        <div className="p-3 bg-slate-50 dark:bg-slate-850 border-t border-slate-200 dark:border-slate-800 space-y-1.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
             Suggested Guidance Questions:
           </span>
           <div className="flex flex-wrap gap-1.5">
@@ -230,7 +230,7 @@ export const SchemeMitraModal: React.FC<SchemeMitraModalProps> = ({
                 key={idx}
                 onClick={() => handleSend(q)}
                 disabled={isLoading}
-                className="text-[11px] text-left px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 hover:text-indigo-700 dark:hover:text-indigo-300 text-slate-700 dark:text-slate-200 transition border border-slate-200 dark:border-slate-700 cursor-pointer"
+                className="text-[11px] text-left px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 hover:text-indigo-700 dark:hover:text-indigo-300 text-slate-700 dark:text-slate-200 transition border border-slate-200 dark:border-slate-700 cursor-pointer shadow-xs"
               >
                 {q}
               </button>

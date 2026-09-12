@@ -208,12 +208,12 @@ export const AllSchemesView: React.FC<AllSchemesViewProps> = ({
 
               {/* Financial Metrics */}
               <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
-                <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
-                  <span className="text-[11px] text-slate-400 dark:text-slate-400 block">Interest Rate:</span>
+                <div className="p-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 block">Interest Rate:</span>
                   <span className="font-bold text-emerald-700 dark:text-emerald-400">{scheme.terms?.interestRateMin ?? 4}% – {scheme.terms?.interestRateMax ?? 8}%</span>
                 </div>
-                <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
-                  <span className="text-[11px] text-slate-400 dark:text-slate-400 block">Max Loan:</span>
+                <div className="p-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 block">Max Loan:</span>
                   <span className="font-bold text-slate-900 dark:text-white">{formatIndianCurrency(scheme.rules?.maxLoanAmount ?? 500000, true)}</span>
                 </div>
               </div>

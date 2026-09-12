@@ -169,8 +169,8 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850">
-                <th className="p-4 w-1/4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/90">
+                <th className="p-4 w-1/4 font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                   Attribute
                 </th>
                 {selectedSchemes.map(s => (
@@ -201,7 +201,7 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {/* Max Loan Assistance */}
               <tr>
-                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-850/50">Max Loan Limit</td>
+                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-800/50">Max Loan Limit</td>
                 {selectedSchemes.map(s => (
                   <td key={s.id} className="p-4 font-extrabold text-slate-900 dark:text-white text-sm">
                     {formatIndianCurrency(s.rules.maxLoanAmount, true)}
@@ -211,7 +211,7 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
 
               {/* Interest Rate */}
               <tr>
-                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-850/50">Interest Rate Range</td>
+                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-800/50">Interest Rate Range</td>
                 {selectedSchemes.map(s => (
                   <td key={s.id} className="p-4 font-bold text-emerald-700 dark:text-emerald-400">
                     {s.terms.interestRateMin}% – {s.terms.interestRateMax}% p.a.
@@ -221,7 +221,7 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
 
               {/* Women Concession */}
               <tr>
-                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-850/50">Women Entrepreneur Rebate</td>
+                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-800/50">Women Entrepreneur Rebate</td>
                 {selectedSchemes.map(s => (
                   <td key={s.id} className="p-4 text-slate-700 dark:text-slate-300">
                     {s.terms.rebateForWomenPercent > 0 
@@ -235,7 +235,7 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
 
               {/* Max Tenure */}
               <tr>
-                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-850/50">Max Tenure</td>
+                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-800/50">Max Tenure</td>
                 {selectedSchemes.map(s => (
                   <td key={s.id} className="p-4 font-semibold text-slate-800 dark:text-slate-200">
                     {s.terms.tenureYearsMax} Years ({s.terms.moratoriumMonths} mo. moratorium)
@@ -245,7 +245,7 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
 
               {/* Minimum Margin Money */}
               <tr>
-                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-850/50">Promoter Margin Required</td>
+                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-800/50">Promoter Margin Required</td>
                 {selectedSchemes.map(s => (
                   <td key={s.id} className="p-4 font-semibold text-slate-800 dark:text-slate-200">
                     {s.rules.personalContributionMinPercent === 0 
@@ -257,7 +257,7 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
 
               {/* Annual Income Limit */}
               <tr>
-                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-850/50">Family Income Ceiling</td>
+                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-800/50">Family Income Ceiling</td>
                 {selectedSchemes.map(s => (
                   <td key={s.id} className="p-4 font-semibold text-slate-800 dark:text-slate-200">
                     {s.rules.maxAnnualIncome === 0 ? "No Income Ceiling" : formatIndianCurrency(s.rules.maxAnnualIncome)}
@@ -267,7 +267,7 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
 
               {/* Target Categories */}
               <tr>
-                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-850/50">Eligible Categories</td>
+                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-800/50">Eligible Categories</td>
                 {selectedSchemes.map(s => (
                   <td key={s.id} className="p-4 text-slate-700 dark:text-slate-300">
                     {s.rules.eligibleCategories.join(', ')}
@@ -277,7 +277,7 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
 
               {/* Channel Partners */}
               <tr>
-                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-850/50">Implementation Channel</td>
+                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-800/50">Implementation Channel</td>
                 {selectedSchemes.map(s => (
                   <td key={s.id} className="p-4 text-slate-600 dark:text-slate-400 leading-relaxed">
                     {s.channelPartners.slice(0, 3).join(', ')}
@@ -286,7 +286,7 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
               </tr>
 
               {/* Action Buttons */}
-              <tr className="bg-slate-50/40 dark:bg-slate-850/40">
+              <tr className="bg-slate-50/40 dark:bg-slate-800/40">
                 <td className="p-4 font-bold text-slate-700 dark:text-slate-300">Actions</td>
                 {selectedSchemes.map(s => (
                   <td key={s.id} className="p-4 space-y-2">
