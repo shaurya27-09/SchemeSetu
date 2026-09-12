@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   MapPin, 
   Phone, 
@@ -9,7 +9,8 @@ import {
   Building, 
   Search,
   CheckCircle,
-  Filter
+  Filter,
+  Database
 } from 'lucide-react';
 import { ChannelPartnerBranch } from '../../types';
 import { Language, TRANSLATIONS } from '../../utils/translations';
@@ -21,13 +22,27 @@ interface BranchLocatorViewProps {
 
 export const BranchLocatorView: React.FC<BranchLocatorViewProps> = ({ language }) => {
   const t = TRANSLATIONS[language];
-  const branches = dataStore.getBranches();
+  const [branches, setBranches] = useState<ChannelPartnerBranch[]>(() => dataStore.getBranches());
 
+  useEffect(() => {
+    return dataStore.subscribe(() => {
+      setBranches(dataStore.getBranches());
+    });
+  }, []);
+
+  const [selectedCorp, setSelectedCorp] = useState<string>('All');
   const [selectedState, setSelectedState] = useState<string>('All');
   const [selectedType, setSelectedType] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [selectedBranch, setSelectedBranch] = useState<ChannelPartnerBranch>(branches[0]);
+  const [selectedBranch, setSelectedBranch] = useState<ChannelPartnerBranch>(branches[0] || {} as ChannelPartnerBranch);
+
+  // Keep selected branch valid when branches change
+  useEffect(() => {
+    if (!selectedBranch?.id && branches.length > 0) {
+      setSelectedBranch(branches[0]);
+    }
+  }, [branches, selectedBranch]);
 
   // States available in branch database
   const states = ['All', ...Array.from(new Set(branches.map(b => b.state)))];
@@ -64,6 +79,7 @@ export const BranchLocatorView: React.FC<BranchLocatorViewProps> = ({ language }
 
   // Filter branches
   const filteredBranches = branches.filter(b => {
+    const matchCorp = selectedCorp === 'All' || b.corporation === selectedCorp;
     const matchState = selectedState === 'All' || b.state === selectedState;
     const matchType = selectedType === 'All' || b.agencyType === selectedType;
     const matchQuery = 
@@ -71,7 +87,7 @@ export const BranchLocatorView: React.FC<BranchLocatorViewProps> = ({ language }
       b.district.toLowerCase().includes(searchQuery.toLowerCase()) ||
       b.state.toLowerCase().includes(searchQuery.toLowerCase()) ||
       b.address.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchState && matchType && matchQuery;
+    return matchCorp && matchState && matchType && matchQuery;
   });
 
   return (
@@ -79,12 +95,16 @@ export const BranchLocatorView: React.FC<BranchLocatorViewProps> = ({ language }
       {/* Header */}
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
               District Nodal Centers & Banks
             </span>
             <span className="text-xs text-slate-500 font-mono">
               Official Implementing Channels
+            </span>
+            <span className="inline-flex items-center space-x-1 text-[11px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">
+              <Database className="w-3 h-3 text-indigo-500" />
+              <span>Supabase branches table: {branches.length} Registered</span>
             </span>
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900 mt-2">
@@ -105,7 +125,7 @@ export const BranchLocatorView: React.FC<BranchLocatorViewProps> = ({ language }
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Search */}
         <div className="relative">
           <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
@@ -116,6 +136,20 @@ export const BranchLocatorView: React.FC<BranchLocatorViewProps> = ({ language }
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500"
           />
+        </div>
+
+        {/* Corporation filter (STEP 12) */}
+        <div>
+          <select
+            value={selectedCorp}
+            onChange={(e) => setSelectedCorp(e.target.value)}
+            className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs text-slate-700 font-medium"
+          >
+            <option value="All">All Apex Corporations</option>
+            <option value="NSFDC">NSFDC (Scheduled Castes)</option>
+            <option value="NBCFDC">NBCFDC (Backward Classes)</option>
+            <option value="NSKFDC">NSKFDC (Safai Karamcharis)</option>
+          </select>
         </div>
 
         {/* State filter */}
@@ -131,7 +165,7 @@ export const BranchLocatorView: React.FC<BranchLocatorViewProps> = ({ language }
           </select>
         </div>
 
-        {/* Type filter */}
+        {/* Agency Type filter (STEP 12) */}
         <div>
           <select
             value={selectedType}
@@ -140,7 +174,8 @@ export const BranchLocatorView: React.FC<BranchLocatorViewProps> = ({ language }
           >
             <option value="All">All Agency Types</option>
             <option value="SCA">State Channelising Agency (SCA)</option>
-            <option value="Bank">Nominated Public Sector Bank</option>
+            <option value="Bank">Public Sector Bank (PSB / Bank)</option>
+            <option value="RRB">Regional Rural Bank (RRB)</option>
             <option value="Social_Welfare_Office">District Social Welfare Office</option>
           </select>
         </div>
@@ -171,11 +206,17 @@ export const BranchLocatorView: React.FC<BranchLocatorViewProps> = ({ language }
                     <div className="flex items-center space-x-2">
                       <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
                         branch.agencyType === 'SCA' ? 'bg-purple-100 text-purple-800' :
-                        branch.agencyType === 'PSB' ? 'bg-blue-100 text-blue-800' :
+                        branch.agencyType === 'Bank' ? 'bg-blue-100 text-blue-800' :
+                        branch.agencyType === 'RRB' ? 'bg-emerald-100 text-emerald-800' :
                         'bg-amber-100 text-amber-800'
                       }`}>
                         {branch.agencyType}
                       </span>
+                      {branch.isDemoData && (
+                        <span className="text-[10px] font-semibold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full border border-slate-200">
+                          Demo Data
+                        </span>
+                      )}
                       <span className="text-xs font-bold text-slate-500">
                         {branch.district}, {branch.state}
                       </span>

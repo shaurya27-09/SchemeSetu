@@ -12,6 +12,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { calculateEmi, formatIndianCurrency, EMI_DISCLAIMER } from '../../services/emiCalculator';
+import { calculateEmiViaRpc } from '../../services/supabaseService';
 import { Language, TRANSLATIONS } from '../../utils/translations';
 import { dataStore } from '../../services/dataStore';
 import { Scheme } from '../../types';
@@ -58,12 +59,56 @@ export const EmiCalculatorPage: React.FC<EmiCalculatorPageProps> = ({
     }
   };
 
-  const emiResult = calculateEmi({
+  // Local immediate calculation for responsive UI
+  const localEmiResult = calculateEmi({
     principal,
     annualRate,
     tenureYears,
     moratoriumMonths
   });
+
+  const [rpcResult, setRpcResult] = useState<typeof localEmiResult>(localEmiResult);
+  const [isRpcLoading, setIsRpcLoading] = useState<boolean>(false);
+  const [isRpcActive, setIsRpcActive] = useState<boolean>(false);
+
+  // Sync with Supabase RPC calculate_emi (STEP 9)
+  useEffect(() => {
+    let active = true;
+    setIsRpcLoading(true);
+
+    calculateEmiViaRpc({
+      principal,
+      annualRate,
+      tenureMonths: tenureYears * 12,
+      moratoriumMonths,
+      interestAccruesDuringMoratorium: false
+    }).then(res => {
+      if (!active) return;
+      setRpcResult({
+        principal: res.principal,
+        annualRate: res.annualRate,
+        tenureYears: Math.round(res.tenureMonths / 12),
+        moratoriumMonths: res.moratoriumMonths,
+        monthlyEmi: res.monthlyEmi,
+        totalInterest: res.totalInterest,
+        totalRepayment: res.totalRepayment,
+        disclaimer: res.disclaimer
+      });
+      setIsRpcActive(true);
+      setIsRpcLoading(false);
+    }).catch(() => {
+      if (active) {
+        setRpcResult(localEmiResult);
+        setIsRpcLoading(false);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [principal, annualRate, tenureYears, moratoriumMonths]);
+
+  const emiResult = rpcResult || localEmiResult;
 
   const principalRatio = emiResult.totalRepayment > 0 
     ? Math.round((emiResult.principal / emiResult.totalRepayment) * 100) 
@@ -81,6 +126,10 @@ export const EmiCalculatorPage: React.FC<EmiCalculatorPageProps> = ({
             </span>
             <span className="text-xs text-slate-500 font-mono">
               Reducing-Balance Method
+            </span>
+            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center space-x-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>Supabase: calculate_emi RPC</span>
             </span>
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900 mt-2">

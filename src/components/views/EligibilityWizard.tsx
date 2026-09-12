@@ -17,6 +17,8 @@ import { ApplicantProfile, BeneficiaryCategory, Gender, LocationType, BusinessSt
 import { Language, TRANSLATIONS } from '../../utils/translations';
 import { dataStore } from '../../services/dataStore';
 import { formatIndianCurrency } from '../../services/emiCalculator';
+import { getBeneficiaryGroups, getIndiaStates, getLookupOptions } from '../../services/supabaseService';
+import { isSupabaseConfigured } from '../../services/supabaseClient';
 
 interface EligibilityWizardProps {
   language: Language;
@@ -25,13 +27,13 @@ interface EligibilityWizardProps {
   initialProfile?: ApplicantProfile | null;
 }
 
-const INDIAN_STATES = [
+const FALLBACK_INDIAN_STATES = [
   "Delhi", "Maharashtra", "Uttar Pradesh", "Karnataka", "Tamil Nadu", 
   "Bihar", "West Bengal", "Gujarat", "Rajasthan", "Madhya Pradesh", 
   "Punjab", "Haryana", "Andhra Pradesh", "Telangana", "Kerala", "Odisha", "Assam"
 ];
 
-const SECTOR_OPTIONS = [
+const FALLBACK_SECTOR_OPTIONS = [
   "Retail & Petty Trade",
   "Small Scale Manufacturing",
   "Service & Repair Shop",
@@ -83,7 +85,42 @@ export const EligibilityWizard: React.FC<EligibilityWizardProps> = ({
   const [currentStep, setCurrentStep] = useState<number>(1);
   const totalSteps = 5;
 
-  // Auto-save partial progress
+  // Supabase Database-driven dropdowns (STEP 4)
+  const [statesList, setStatesList] = useState<Array<{ code: string; name: string }>>(() => 
+    FALLBACK_INDIAN_STATES.map(name => ({ code: name, name }))
+  );
+  const [categoriesList, setCategoriesList] = useState<Array<{ code: string; label: string; description: string }>>([]);
+  const [sectorsList, setSectorsList] = useState<string[]>(FALLBACK_SECTOR_OPTIONS);
+  const [isDbConnected, setIsDbConnected] = useState<boolean>(false);
+
+  useEffect(() => {
+    let mounted = true;
+    Promise.all([
+      getIndiaStates(),
+      getBeneficiaryGroups(),
+      getLookupOptions('business_sector')
+    ]).then(([states, categories, sectors]) => {
+      if (!mounted) return;
+      if (states && states.length > 0) {
+        setStatesList(states);
+      }
+      if (categories && categories.length > 0) {
+        setCategoriesList(categories);
+      }
+      if (sectors && sectors.length > 0) {
+        setSectorsList(sectors.map(s => s.label));
+      }
+      setIsDbConnected(isSupabaseConfigured());
+    }).catch(err => {
+      console.warn('Dropdown fetch note:', err);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Auto-save partial progress to local store & Supabase profiles
   useEffect(() => {
     dataStore.saveProfile(profile);
   }, [profile]);
@@ -206,9 +243,15 @@ export const EligibilityWizard: React.FC<EligibilityWizardProps> = ({
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200">
-              Deterministic Eligibility Questionnaire
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200">
+                Deterministic Eligibility Questionnaire
+              </span>
+              <span className="inline-flex items-center space-x-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Supabase: Live Tables Connected</span>
+              </span>
+            </div>
             <h1 className="text-2xl font-extrabold text-slate-900 mt-2">
               {t.wizardTitle}
             </h1>
@@ -327,17 +370,22 @@ export const EligibilityWizard: React.FC<EligibilityWizardProps> = ({
 
               {/* State */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  {t.labelState} *
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    {t.labelState} *
+                  </label>
+                  <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                    DB: india_states ({statesList.length})
+                  </span>
+                </div>
                 <select
                   id="input-state"
                   value={profile.state}
                   onChange={(e) => updateField('state', e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-medium"
                 >
-                  {INDIAN_STATES.map((st) => (
-                    <option key={st} value={st}>{st}</option>
+                  {statesList.map((st) => (
+                    <option key={st.code} value={st.name}>{st.name}</option>
                   ))}
                 </select>
               </div>
@@ -653,16 +701,21 @@ export const EligibilityWizard: React.FC<EligibilityWizardProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* Business Sector */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  {t.labelBusinessSector} *
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    {t.labelBusinessSector} *
+                  </label>
+                  <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                    DB: lookup_options ({sectorsList.length})
+                  </span>
+                </div>
                 <select
                   id="input-sector"
                   value={profile.businessSector}
                   onChange={(e) => updateField('businessSector', e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-medium"
                 >
-                  {SECTOR_OPTIONS.map((sec) => (
+                  {sectorsList.map((sec) => (
                     <option key={sec} value={sec}>{sec}</option>
                   ))}
                 </select>

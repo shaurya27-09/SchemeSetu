@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   CheckCircle2, 
   XCircle, 
@@ -15,13 +15,17 @@ import {
   Percent,
   ChevronDown,
   ChevronUp,
-  Info
+  Info,
+  Bookmark,
+  BookmarkCheck,
+  Database
 } from 'lucide-react';
 import { ApplicantProfile, Scheme, EligibilityResult, WhatIfParams } from '../../types';
 import { Language, TRANSLATIONS } from '../../utils/translations';
 import { matchSchemes, evaluateSchemeEligibility } from '../../services/matchingEngine';
 import { formatIndianCurrency } from '../../services/emiCalculator';
 import { dataStore } from '../../services/dataStore';
+import { recordMatchRunToSupabase } from '../../services/supabaseService';
 
 interface ResultsDashboardProps {
   language: Language;
@@ -68,6 +72,33 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
 
   const { eligibleSchemes, possiblyEligibleSchemes, ineligibleSchemes, bestMatch } = matchOutput;
 
+  // Bookmarked / Saved schemes (STEP 8)
+  const [savedIds, setSavedIds] = useState<string[]>(() => dataStore.getSavedSchemeIds());
+  const [recordedRunId, setRecordedRunId] = useState<string | null>(null);
+
+  useEffect(() => {
+    return dataStore.subscribe(() => {
+      setSavedIds(dataStore.getSavedSchemeIds());
+    });
+  }, []);
+
+  // Record deterministic match run into Supabase match_runs & match_results (STEP 5 & 6)
+  useEffect(() => {
+    recordMatchRunToSupabase(profile, matchOutput.allResults).then(runId => {
+      if (runId) {
+        setRecordedRunId(runId);
+      }
+    }).catch(err => {
+      console.warn('[ResultsDashboard] Match run recording note:', err);
+    });
+  }, [profile, showWhatIf, whatIfParams.projectCost, whatIfParams.requestedLoanAmount]);
+
+  const handleToggleSave = async (schemeId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    await dataStore.toggleSaveScheme(schemeId);
+    setSavedIds(dataStore.getSavedSchemeIds());
+  };
+
   const currentList = 
     activeTab === 'eligible' 
       ? eligibleSchemes 
@@ -80,12 +111,16 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
       {/* Top Banner & Profile Summary */}
       <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
               Deterministic Matching Output
             </span>
             <span className="text-xs text-slate-500 font-mono">
               Evaluated {allSchemes.length} statutory schemes
+            </span>
+            <span className="inline-flex items-center space-x-1 text-[11px] font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">
+              <Database className="w-3 h-3 text-indigo-500" />
+              <span>{recordedRunId ? `Match Run Synced: #${recordedRunId.slice(0, 8)}` : 'Supabase match_runs Sync Active'}</span>
             </span>
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900 mt-2">
@@ -496,6 +531,39 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                         <Scale className="w-3.5 h-3.5 text-slate-400" />
                         <span>Compare</span>
                       </button>
+
+                      {/* Saved Scheme Bookmark Toggle (STEP 8) */}
+                      <button
+                        id={`btn-save-match-${scheme.id}`}
+                        onClick={(e) => handleToggleSave(scheme.id, e)}
+                        className={`flex items-center space-x-1 px-3 py-1.5 rounded-lg border text-xs transition ${
+                          savedIds.includes(scheme.id)
+                            ? 'border-amber-300 bg-amber-50 text-amber-700 font-bold'
+                            : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                        }`}
+                        title={savedIds.includes(scheme.id) ? "Saved in Bookmarks" : "Save Scheme"}
+                      >
+                        {savedIds.includes(scheme.id) ? (
+                          <>
+                            <BookmarkCheck className="w-3.5 h-3.5 text-amber-600" />
+                            <span>Saved</span>
+                          </>
+                        ) : (
+                          <>
+                            <Bookmark className="w-3.5 h-3.5 text-slate-400" />
+                            <span>Save</span>
+                          </>
+                        )}
+                      </button>
+
+                      {/* Expand Rule Matrix (STEP 6) */}
+                      <button
+                        onClick={() => setExpandedSchemeId(isExpanded ? null : scheme.id)}
+                        className="flex items-center space-x-1 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs transition"
+                      >
+                        <span>{isExpanded ? "Hide Rules" : "Inspect Rule Breakdown"}</span>
+                        {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                      </button>
                     </div>
 
                     <a
@@ -508,6 +576,60 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                       <ExternalLink className="w-3 h-3" />
                     </a>
                   </div>
+
+                  {/* Expandable Deterministic Rule Breakdown (STEP 6) */}
+                  {isExpanded && (
+                    <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
+                          Deterministic Rule Engine Audit Breakdown
+                        </span>
+                        <span className="text-[10px] font-mono text-slate-500">
+                          Scheme Code: {scheme.code} | Status: {result.status.toUpperCase()}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        <div className="p-2 bg-white rounded-lg border border-slate-200">
+                          <span className="text-slate-400 block text-[10px]">Beneficiary Target Category</span>
+                          <span className="font-semibold text-slate-800">{scheme.rules.eligibleCategories.join(', ')}</span>
+                          <span className="block text-[10px] mt-0.5 text-emerald-600 font-medium">
+                            Applicant ({profile.category}): {scheme.rules.eligibleCategories.includes(profile.category) ? '✓ Matched' : '✗ Category Ineligible'}
+                          </span>
+                        </div>
+
+                        <div className="p-2 bg-white rounded-lg border border-slate-200">
+                          <span className="text-slate-400 block text-[10px]">Age Range Permitted</span>
+                          <span className="font-semibold text-slate-800">{scheme.rules.minAge} to {scheme.rules.maxAge} years</span>
+                          <span className="block text-[10px] mt-0.5 text-emerald-600 font-medium">
+                            Applicant ({profile.age} yrs): {profile.age >= scheme.rules.minAge && profile.age <= scheme.rules.maxAge ? '✓ Within Limits' : '✗ Out of Range'}
+                          </span>
+                        </div>
+
+                        <div className="p-2 bg-white rounded-lg border border-slate-200">
+                          <span className="text-slate-400 block text-[10px]">Max Credit Limit</span>
+                          <span className="font-semibold text-slate-800">{formatIndianCurrency(scheme.rules.maxLoanAmount, true)}</span>
+                          <span className="block text-[10px] mt-0.5 font-medium text-slate-700">
+                            Requested: {formatIndianCurrency(profile.requestedLoanAmount, true)} ({profile.requestedLoanAmount <= scheme.rules.maxLoanAmount ? '✓ Within Limit' : '⚠ Exceeds Scheme Max'})
+                          </span>
+                        </div>
+
+                        <div className="p-2 bg-white rounded-lg border border-slate-200">
+                          <span className="text-slate-400 block text-[10px]">Income Ceiling Criteria</span>
+                          <span className="font-semibold text-slate-800">
+                            {scheme.rules.maxAnnualIncome === 0 ? 'No Ceiling (Waiver Active)' : formatIndianCurrency(scheme.rules.maxAnnualIncome, true)}
+                          </span>
+                          <span className="block text-[10px] mt-0.5 font-medium text-slate-700">
+                            Declared Income: {formatIndianCurrency(profile.annualFamilyIncome, true)} ({scheme.rules.maxAnnualIncome === 0 || profile.annualFamilyIncome <= scheme.rules.maxAnnualIncome ? '✓ Eligible' : '✗ Exceeds Ceiling'})
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="text-[11px] text-slate-500 pt-1">
+                        Required Documents ({scheme.documents.length}): {scheme.documents.map(d => d.name).join(', ')}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             );

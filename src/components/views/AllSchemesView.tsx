@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   Filter, 
@@ -9,7 +9,9 @@ import {
   IndianRupee, 
   ArrowRight,
   Scale,
-  Sparkles
+  Sparkles,
+  Bookmark,
+  BookmarkCheck
 } from 'lucide-react';
 import { Scheme } from '../../types';
 import { Language, TRANSLATIONS } from '../../utils/translations';
@@ -32,13 +34,23 @@ export const AllSchemesView: React.FC<AllSchemesViewProps> = ({
   onCheckEligibility
 }) => {
   const t = TRANSLATIONS[language];
-  const allSchemes = dataStore.getSchemes().filter(s => s.active);
+  const [allSchemes, setAllSchemes] = useState<Scheme[]>(() => dataStore.getSchemes().filter(s => s.active));
+  const [savedIds, setSavedIds] = useState<string[]>(() => dataStore.getSavedSchemeIds());
+  const [onlySaved, setOnlySaved] = useState<boolean>(false);
+
+  useEffect(() => {
+    return dataStore.subscribe(() => {
+      setAllSchemes(dataStore.getSchemes().filter(s => s.active));
+      setSavedIds(dataStore.getSavedSchemeIds());
+    });
+  }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCorp, setSelectedCorp] = useState<string>('All');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
   const filtered = allSchemes.filter(scheme => {
+    if (onlySaved && !savedIds.includes(scheme.id)) return false;
     const matchesCorp = selectedCorp === 'All' || scheme.corporation === selectedCorp;
     const matchesCat = selectedCategory === 'All' || scheme.rules.eligibleCategories.includes(selectedCategory as any);
     const matchesQuery = 
@@ -49,6 +61,12 @@ export const AllSchemesView: React.FC<AllSchemesViewProps> = ({
 
     return matchesCorp && matchesCat && matchesQuery;
   });
+
+  const handleToggleSave = async (schemeId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    await dataStore.toggleSaveScheme(schemeId);
+    setSavedIds(dataStore.getSavedSchemeIds());
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -81,46 +99,74 @@ export const AllSchemesView: React.FC<AllSchemesViewProps> = ({
       </div>
 
       {/* Filter Controls */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Search */}
-        <div className="relative">
-          <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search by scheme name or keywords..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500"
-          />
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setOnlySaved(false)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                !onlySaved ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              All Schemes ({allSchemes.length})
+            </button>
+            <button
+              onClick={() => setOnlySaved(true)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 ${
+                onlySaved ? 'bg-amber-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              <Bookmark className="w-3.5 h-3.5" />
+              <span>Saved Schemes ({savedIds.length})</span>
+            </button>
+          </div>
+
+          <span className="text-xs text-slate-500">
+            Showing <strong>{filtered.length}</strong> matching schemes
+          </span>
         </div>
 
-        {/* Corporation */}
-        <div>
-          <select
-            value={selectedCorp}
-            onChange={(e) => setSelectedCorp(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs text-slate-700 font-medium"
-          >
-            <option value="All">All Apex Corporations (NSFDC, NBCFDC, NSKFDC)</option>
-            <option value="NSFDC">NSFDC (Scheduled Castes)</option>
-            <option value="NBCFDC">NBCFDC (Backward Classes)</option>
-            <option value="NSKFDC">NSKFDC (Safai Karamcharis)</option>
-          </select>
-        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search by scheme name or keywords..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
 
-        {/* Category */}
-        <div>
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs text-slate-700 font-medium"
-          >
-            <option value="All">All Target Beneficiaries</option>
-            <option value="SC">Scheduled Caste (SC)</option>
-            <option value="OBC">Other Backward Classes (OBC)</option>
-            <option value="SafaiKaramchari">Safai Karamchari / Sanitation</option>
-            <option value="DNT_NT">De-Notified Tribes (DNT)</option>
-          </select>
+          {/* Corporation */}
+          <div>
+            <select
+              value={selectedCorp}
+              onChange={(e) => setSelectedCorp(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs text-slate-700 font-medium"
+            >
+              <option value="All">All Apex Corporations (NSFDC, NBCFDC, NSKFDC)</option>
+              <option value="NSFDC">NSFDC (Scheduled Castes)</option>
+              <option value="NBCFDC">NBCFDC (Backward Classes)</option>
+              <option value="NSKFDC">NSKFDC (Safai Karamcharis)</option>
+            </select>
+          </div>
+
+          {/* Category */}
+          <div>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs text-slate-700 font-medium"
+            >
+              <option value="All">All Target Beneficiaries</option>
+              <option value="SC">Scheduled Caste (SC)</option>
+              <option value="OBC">Other Backward Classes (OBC)</option>
+              <option value="SafaiKaramchari">Safai Karamchari / Sanitation</option>
+              <option value="DNT_NT">De-Notified Tribes (DNT)</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -200,6 +246,22 @@ export const AllSchemesView: React.FC<AllSchemesViewProps> = ({
               </button>
 
               <div className="flex items-center space-x-1.5">
+                <button
+                  id={`btn-save-scheme-${scheme.id}`}
+                  onClick={(e) => handleToggleSave(scheme.id, e)}
+                  className={`p-1.5 rounded-lg border text-xs transition ${
+                    savedIds.includes(scheme.id)
+                      ? 'border-amber-300 bg-amber-50 text-amber-600'
+                      : 'border-slate-200 text-slate-400 hover:text-amber-600 hover:bg-slate-50'
+                  }`}
+                  title={savedIds.includes(scheme.id) ? "Remove from Saved" : "Save Scheme"}
+                >
+                  {savedIds.includes(scheme.id) ? (
+                    <BookmarkCheck className="w-3.5 h-3.5 text-amber-600" />
+                  ) : (
+                    <Bookmark className="w-3.5 h-3.5" />
+                  )}
+                </button>
                 <button
                   onClick={() => onAddToCompare(scheme)}
                   className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 text-xs"
