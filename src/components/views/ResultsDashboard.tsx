@@ -626,7 +626,7 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                       </div>
 
                       <div className="text-[11px] text-slate-500 pt-1">
-                        Required Documents ({scheme.documents.length}): {scheme.documents.map(d => d.name).join(', ')}
+                        Required Documents ({scheme.documents.length}): {scheme.documents.map(d => d.title).join(', ')}
                       </div>
                     </div>
                   )}

@@ -432,7 +432,7 @@ export async function fetchUserSavedSchemeIds(userId: string): Promise<string[]>
   }
 }
 
-export async function toggleSaveScheme(userId: string, schemeId: string, currentSaved: boolean): Promise<boolean> {
+export async function toggleSaveScheme(userId: string, schemeId: string, currentSaved: boolean = false): Promise<boolean> {
   try {
     if (currentSaved) {
       await supabase

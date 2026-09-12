@@ -450,8 +450,9 @@ export class DataStore {
   }
 
   public async toggleSaveScheme(schemeId: string): Promise<boolean> {
+    const wasAlreadySaved = this.savedSchemeIds.includes(schemeId);
     let isSaved = false;
-    if (this.savedSchemeIds.includes(schemeId)) {
+    if (wasAlreadySaved) {
       this.savedSchemeIds = this.savedSchemeIds.filter(id => id !== schemeId);
       isSaved = false;
     } else {
@@ -463,7 +464,7 @@ export class DataStore {
     try {
       const { data } = await supabase.auth.getUser();
       if (data?.user) {
-        await toggleSaveScheme(data.user.id, schemeId);
+        await toggleSaveScheme(data.user.id, schemeId, wasAlreadySaved);
       }
     } catch (err) {
       console.warn('[DataStore] toggleSaveScheme Supabase note:', err);

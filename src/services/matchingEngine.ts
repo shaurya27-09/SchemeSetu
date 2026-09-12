@@ -343,6 +343,7 @@ export function matchSchemes(
   eligibleSchemes: EligibilityResult[];
   possiblyEligibleSchemes: EligibilityResult[];
   ineligibleSchemes: EligibilityResult[];
+  allResults: EligibilityResult[];
   bestMatch: EligibilityResult | null;
   totalEligibleCount: number;
 } {
@@ -372,6 +373,7 @@ export function matchSchemes(
     eligibleSchemes,
     possiblyEligibleSchemes,
     ineligibleSchemes,
+    allResults: results,
     bestMatch,
     totalEligibleCount: eligibleSchemes.length
   };

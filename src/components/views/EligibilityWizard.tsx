@@ -110,7 +110,7 @@ export const EligibilityWizard: React.FC<EligibilityWizardProps> = ({
       if (sectors && sectors.length > 0) {
         setSectorsList(sectors.map(s => s.label));
       }
-      setIsDbConnected(isSupabaseConfigured());
+      setIsDbConnected(Boolean(isSupabaseConfigured));
     }).catch(err => {
       console.warn('Dropdown fetch note:', err);
     });
