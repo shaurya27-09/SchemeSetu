@@ -64,14 +64,14 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ variant = 'dropdown', 
         id="btn-theme-toggle"
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition cursor-pointer"
+        className="shrink-0 flex items-center space-x-1.5 px-2 sm:px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition cursor-pointer"
         title={`Current theme: ${theme} (resolved: ${resolvedTheme}). Click to switch.`}
         aria-label="Toggle theme"
         aria-expanded={isOpen}
       >
-        <CurrentIcon className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-        <span className="hidden sm:inline capitalize">{theme}</span>
-        <ChevronDown className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+        <CurrentIcon className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+        <span className="hidden 2xl:inline capitalize">{theme}</span>
+        <ChevronDown className="w-3 h-3 text-slate-400 dark:text-slate-500 shrink-0" />
       </button>
 
       {isOpen && (

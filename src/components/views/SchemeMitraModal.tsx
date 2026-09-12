@@ -137,29 +137,30 @@ export const SchemeMitraModal: React.FC<SchemeMitraModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-end animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-lg h-full shadow-2xl flex flex-col border-l border-slate-200 dark:border-slate-800 transition-colors">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-[min(420px,100vw)] h-full shadow-2xl flex flex-col border-l border-slate-200 dark:border-slate-800 transition-colors">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-950 to-slate-900 text-white p-4 flex items-center justify-between border-b border-indigo-900/80">
-          <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-slate-950 font-black shadow-md">
+        <div className="bg-gradient-to-r from-indigo-950 to-slate-900 text-white p-4 flex items-center justify-between border-b border-indigo-900/80 shrink-0">
+          <div className="flex items-center space-x-3 min-w-0 pr-2">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-slate-950 font-black shadow-md shrink-0">
               <Sparkles className="w-5 h-5 text-slate-950" />
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center space-x-2">
-                <h3 className="font-extrabold text-sm tracking-tight text-white">Scheme Mitra AI</h3>
-                <span className="text-[10px] uppercase font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                <h3 className="font-extrabold text-sm tracking-tight text-white truncate">Scheme Mitra AI</h3>
+                <span className="text-[10px] uppercase font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30 shrink-0">
                   Online
                 </span>
               </div>
-              <p className="text-[11px] text-slate-300">
-                MoSJE Virtual Entrepreneur Advisor • Gemini Powered
+              <p className="text-[11px] text-slate-300 truncate">
+                MoSJE Virtual Advisor • Gemini Powered
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition cursor-pointer shrink-0"
+            aria-label="Close Scheme Mitra"
           >
             <X className="w-5 h-5" />
           </button>

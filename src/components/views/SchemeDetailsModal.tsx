@@ -36,7 +36,7 @@ export const SchemeDetailsModal: React.FC<SchemeDetailsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-800 transition-colors">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-4xl max-w-[calc(100vw-2rem)] w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 dark:border-slate-800 transition-colors">
         {/* Header Ribbon */}
         <div className="sticky top-0 z-10 bg-slate-900 dark:bg-slate-950 text-white p-6 rounded-t-3xl flex items-start justify-between border-b border-slate-800">
           <div className="space-y-1 max-w-2xl">
