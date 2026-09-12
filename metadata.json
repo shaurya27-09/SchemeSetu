@@ -1,0 +1,10 @@
+{
+  "name": "SchemeSetu",
+  "description": "AI-Driven Scheme Matching Platform for Entrepreneurs - Ministry of Social Justice and Empowerment, Government of India (SIH26092)",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
