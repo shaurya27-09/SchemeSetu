@@ -72,7 +72,7 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
 
   const { eligibleSchemes, possiblyEligibleSchemes, ineligibleSchemes, bestMatch } = matchOutput;
 
-  // Bookmarked / Saved schemes (STEP 8)
+  // Bookmarked / Saved schemes
   const [savedIds, setSavedIds] = useState<string[]>(() => dataStore.getSavedSchemeIds());
   const [recordedRunId, setRecordedRunId] = useState<string | null>(null);
 
@@ -82,7 +82,7 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
     });
   }, []);
 
-  // Record deterministic match run into Supabase match_runs & match_results (STEP 5 & 6)
+  // Record deterministic match run into Supabase match_runs & match_results
   useEffect(() => {
     recordMatchRunToSupabase(profile, matchOutput.allResults).then(runId => {
       if (runId) {
@@ -107,27 +107,27 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
       : ineligibleSchemes;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in duration-200">
       {/* Top Banner & Profile Summary */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
               Deterministic Matching Output
             </span>
-            <span className="text-xs text-slate-500 font-mono">
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
               Evaluated {allSchemes.length} statutory schemes
             </span>
-            <span className="inline-flex items-center space-x-1 text-[11px] font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">
+            <span className="inline-flex items-center space-x-1 text-[11px] font-semibold text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/80 px-2.5 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
               <Database className="w-3 h-3 text-indigo-500" />
-              <span>{recordedRunId ? `Match Run Synced: #${recordedRunId.slice(0, 8)}` : 'Supabase match_runs Sync Active'}</span>
+              <span>{recordedRunId ? `Match Run Synced: #${recordedRunId.slice(0, 8)}` : 'Rule Engine Evaluated'}</span>
             </span>
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 mt-2">
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white mt-2">
             {t.resultsTitle}
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Matching for <strong>{profile.category}</strong> beneficiary | Budget: <strong>{formatIndianCurrency(profile.projectCost, true)}</strong> | Desired Credit: <strong>{formatIndianCurrency(profile.requestedLoanAmount, true)}</strong>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Matching for <strong className="text-slate-800 dark:text-slate-200">{profile.category}</strong> beneficiary | Budget: <strong className="text-slate-800 dark:text-slate-200">{formatIndianCurrency(profile.projectCost, true)}</strong> | Desired Credit: <strong className="text-slate-800 dark:text-slate-200">{formatIndianCurrency(profile.requestedLoanAmount, true)}</strong>
           </p>
         </div>
 
@@ -135,10 +135,10 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
           <button
             id="btn-toggle-whatif"
             onClick={() => setShowWhatIf(!showWhatIf)}
-            className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-bold transition border ${
+            className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-bold transition border cursor-pointer ${
               showWhatIf
                 ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                : 'bg-white text-indigo-700 border-indigo-200 hover:bg-indigo-50'
+                : 'bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-slate-700'
             }`}
           >
             <Sliders className="w-3.5 h-3.5" />
@@ -148,7 +148,7 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
           <button
             id="btn-edit-profile"
             onClick={onEditProfile}
-            className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition"
+            className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition cursor-pointer"
           >
             Modify Questionnaire
           </button>
@@ -157,7 +157,7 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
 
       {/* Embedded "What-If?" Scenario Simulator */}
       {showWhatIf && (
-        <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white p-6 sm:p-8 rounded-2xl shadow-lg space-y-6">
+        <div className="bg-gradient-to-br from-indigo-950 to-slate-900 text-white p-6 sm:p-8 rounded-2xl shadow-lg border border-indigo-900/60 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-indigo-800/80 pb-4">
             <div>
               <h3 className="text-lg font-bold flex items-center space-x-2">
@@ -175,7 +175,7 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                 personalContribution: profile.personalContribution,
                 tenureYears: 7
               })}
-              className="flex items-center space-x-1 text-xs text-indigo-300 hover:text-white"
+              className="flex items-center space-x-1 text-xs text-indigo-300 hover:text-white cursor-pointer"
             >
               <RotateCcw className="w-3 h-3" />
               <span>Reset to Original</span>
@@ -276,53 +276,53 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
       )}
 
       {/* Tabs Filter Bar */}
-      <div className="flex border-b border-slate-200 space-x-2 sm:space-x-4">
+      <div className="flex border-b border-slate-200 dark:border-slate-800 space-x-2 sm:space-x-4">
         <button
           id="tab-eligible"
           onClick={() => setActiveTab('eligible')}
-          className={`pb-3 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center space-x-2 ${
+          className={`pb-3 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center space-x-2 cursor-pointer ${
             activeTab === 'eligible'
-              ? 'border-emerald-600 text-emerald-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'border-emerald-600 text-emerald-700 dark:text-emerald-400'
+              : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
           }`}
         >
-          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           <span>{t.tabEligible} ({eligibleSchemes.length})</span>
         </button>
 
         <button
           id="tab-possibly-eligible"
           onClick={() => setActiveTab('possibly_eligible')}
-          className={`pb-3 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center space-x-2 ${
+          className={`pb-3 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center space-x-2 cursor-pointer ${
             activeTab === 'possibly_eligible'
-              ? 'border-amber-500 text-amber-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'border-amber-500 text-amber-700 dark:text-amber-400'
+              : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
           }`}
         >
-          <AlertTriangle className="w-4 h-4 text-amber-500" />
+          <AlertTriangle className="w-4 h-4 text-amber-500 dark:text-amber-400" />
           <span>{t.tabPossiblyEligible} ({possiblyEligibleSchemes.length})</span>
         </button>
 
         <button
           id="tab-ineligible"
           onClick={() => setActiveTab('ineligible')}
-          className={`pb-3 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center space-x-2 ${
+          className={`pb-3 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition flex items-center space-x-2 cursor-pointer ${
             activeTab === 'ineligible'
-              ? 'border-rose-500 text-rose-700'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'border-rose-500 text-rose-700 dark:text-rose-400'
+              : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
           }`}
         >
-          <XCircle className="w-4 h-4 text-rose-500" />
+          <XCircle className="w-4 h-4 text-rose-500 dark:text-rose-400" />
           <span>{t.tabIneligible} ({ineligibleSchemes.length})</span>
         </button>
       </div>
 
       {/* Schemes List */}
       {currentList.length === 0 ? (
-        <div className="bg-white p-12 text-center rounded-2xl border border-slate-200 space-y-3">
-          <Info className="w-8 h-8 text-slate-400 mx-auto" />
-          <h3 className="text-base font-bold text-slate-700">No schemes found in this category</h3>
-          <p className="text-xs text-slate-500 max-w-md mx-auto">
+        <div className="bg-white dark:bg-slate-900 p-12 text-center rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+          <Info className="w-8 h-8 text-slate-400 dark:text-slate-500 mx-auto" />
+          <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">No schemes found in this category</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
             Check the other tabs above, or adjust your requested loan amount or project cost in the "What-If" simulator.
           </p>
         </div>
@@ -336,10 +336,10 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
             return (
               <div 
                 key={scheme.id}
-                className={`bg-white rounded-2xl border transition-all ${
+                className={`bg-white dark:bg-slate-900 rounded-2xl border transition-all ${
                   isTopMatch && result.status === 'eligible'
-                    ? 'border-indigo-500 shadow-md ring-1 ring-indigo-500'
-                    : 'border-slate-200 shadow-xs hover:border-slate-300'
+                    ? 'border-indigo-500 dark:border-indigo-400 shadow-md ring-1 ring-indigo-500 dark:ring-indigo-400'
+                    : 'border-slate-200 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700'
                 }`}
               >
                 {/* Scheme Header Card */}
@@ -349,14 +349,14 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                       {/* Badges row */}
                       <div className="flex flex-wrap items-center gap-2">
                         <span className={`text-[11px] font-extrabold px-2.5 py-0.5 rounded-full ${
-                          scheme.corporation === 'NSFDC' ? 'bg-blue-100 text-blue-800' :
-                          scheme.corporation === 'NBCFDC' ? 'bg-amber-100 text-amber-800' :
-                          'bg-emerald-100 text-emerald-800'
+                          scheme.corporation === 'NSFDC' ? 'bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300' :
+                          scheme.corporation === 'NBCFDC' ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300' :
+                          'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300'
                         }`}>
                           {scheme.corporation}
                         </span>
 
-                        <span className="text-[11px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                        <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
                           {scheme.code}
                         </span>
 
@@ -367,50 +367,50 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                           </span>
                         )}
 
-                        <span className="text-[11px] text-slate-500">
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400">
                           Target: {scheme.targetGroup}
                         </span>
                       </div>
 
                       {/* Scheme Name */}
-                      <h3 className="text-xl font-bold text-slate-900 hover:text-indigo-600 transition cursor-pointer"
+                      <h3 className="text-xl font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition cursor-pointer"
                         onClick={() => onSelectSchemeDetails(scheme)}
                       >
                         {language === 'hi' ? scheme.nameHi : scheme.name}
                       </h3>
 
-                      <p className="text-xs text-slate-600 leading-relaxed">
+                      <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                         {language === 'hi' ? scheme.descriptionHi : scheme.description}
                       </p>
                     </div>
 
                     {/* Right side: Score & Estimated EMI */}
-                    <div className="flex lg:flex-col items-end justify-between lg:justify-start gap-4 lg:gap-2 shrink-0 bg-slate-50 p-4 rounded-xl border border-slate-200/80">
+                    <div className="flex lg:flex-col items-end justify-between lg:justify-start gap-4 lg:gap-2 shrink-0 bg-slate-50 dark:bg-slate-800/70 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/80">
                       <div>
-                        <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block">
+                        <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider block">
                           Compatibility Score
                         </span>
                         <div className="flex items-baseline space-x-1">
                           <span className={`text-2xl font-black ${
-                            result.matchScore >= 80 ? 'text-emerald-600' :
-                            result.matchScore >= 60 ? 'text-indigo-600' :
-                            result.matchScore >= 40 ? 'text-amber-600' : 'text-slate-400'
+                            result.matchScore >= 80 ? 'text-emerald-600 dark:text-emerald-400' :
+                            result.matchScore >= 60 ? 'text-indigo-600 dark:text-indigo-400' :
+                            result.matchScore >= 40 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400'
                           }`}>
                             {result.matchScore}%
                           </span>
-                          <span className="text-xs text-slate-400">match</span>
+                          <span className="text-xs text-slate-400 dark:text-slate-500">match</span>
                         </div>
                       </div>
 
                       {result.status === 'eligible' && (
                         <div className="text-right">
-                          <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block">
+                          <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider block">
                             Est. Monthly EMI
                           </span>
-                          <span className="text-base font-extrabold text-slate-900">
+                          <span className="text-base font-extrabold text-slate-900 dark:text-white">
                             {formatIndianCurrency(result.financialEstimate.monthlyEmi)}
                           </span>
-                          <span className="text-[10px] text-slate-400 block">
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500 block">
                             @{result.financialEstimate.interestRateApplied}% p.a.
                           </span>
                         </div>
@@ -419,43 +419,43 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                   </div>
 
                   {/* Financial Stats Ribbon */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-slate-100 text-xs">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-xs">
                     <div>
-                      <span className="text-slate-500 block">Interest Rate:</span>
-                      <span className="font-bold text-slate-800">
+                      <span className="text-slate-500 dark:text-slate-400 block">Interest Rate:</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200">
                         {scheme.terms.interestRateMin}% – {scheme.terms.interestRateMax}% p.a.
                       </span>
                     </div>
                     <div>
-                      <span className="text-slate-500 block">Max Scheme Assistance:</span>
-                      <span className="font-bold text-slate-800">
+                      <span className="text-slate-500 dark:text-slate-400 block">Max Scheme Assistance:</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200">
                         {formatIndianCurrency(scheme.rules.maxLoanAmount, true)}
                       </span>
                     </div>
                     <div>
-                      <span className="text-slate-500 block">Max Repayment Period:</span>
-                      <span className="font-bold text-slate-800">
+                      <span className="text-slate-500 dark:text-slate-400 block">Max Repayment Period:</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-200">
                         {scheme.terms.tenureYearsMax} Years ({scheme.terms.moratoriumMonths} mo. moratorium)
                       </span>
                     </div>
                     <div>
-                      <span className="text-slate-500 block">Women Entrepreneur Rebate:</span>
-                      <span className="font-bold text-emerald-700">
+                      <span className="text-slate-500 dark:text-slate-400 block">Women Entrepreneur Rebate:</span>
+                      <span className="font-bold text-emerald-700 dark:text-emerald-400">
                         {scheme.terms.rebateForWomenPercent > 0 ? `${scheme.terms.rebateForWomenPercent}% Interest Rebate` : 'Inclusive / Standard'}
                       </span>
                     </div>
                   </div>
 
                   {/* EXPLAINABILITY BLOCK: WHY ELIGIBLE / WHY INELIGIBLE */}
-                  <div className="mt-4 pt-4 border-t border-slate-100 space-y-3">
+                  <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
                     {/* Eligible Reasons */}
                     {result.reasonsEligible.length > 0 && (
-                      <div className="bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-200/80 space-y-1.5">
-                        <div className="flex items-center space-x-1.5 text-xs font-bold text-emerald-800">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      <div className="bg-emerald-50/70 dark:bg-emerald-950/40 p-3.5 rounded-xl border border-emerald-200/80 dark:border-emerald-800/60 space-y-1.5">
+                        <div className="flex items-center space-x-1.5 text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                           <span>{t.whyEligibleTitle}:</span>
                         </div>
-                        <ul className="space-y-1 pl-5 list-disc text-xs text-emerald-900 leading-relaxed">
+                        <ul className="space-y-1 pl-5 list-disc text-xs text-emerald-900 dark:text-emerald-200 leading-relaxed">
                           {result.reasonsEligible.map((reason, idx) => (
                             <li key={idx}>{reason}</li>
                           ))}
@@ -465,12 +465,12 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
 
                     {/* Ineligible Reasons */}
                     {result.reasonsNotEligible.length > 0 && (
-                      <div className="bg-rose-50/70 p-3.5 rounded-xl border border-rose-200/80 space-y-1.5">
-                        <div className="flex items-center space-x-1.5 text-xs font-bold text-rose-800">
-                          <XCircle className="w-3.5 h-3.5 text-rose-600" />
+                      <div className="bg-rose-50/70 dark:bg-rose-950/40 p-3.5 rounded-xl border border-rose-200/80 dark:border-rose-800/60 space-y-1.5">
+                        <div className="flex items-center space-x-1.5 text-xs font-bold text-rose-800 dark:text-rose-300">
+                          <XCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
                           <span>{t.whyNotEligibleTitle}:</span>
                         </div>
-                        <ul className="space-y-1 pl-5 list-disc text-xs text-rose-900 leading-relaxed">
+                        <ul className="space-y-1 pl-5 list-disc text-xs text-rose-900 dark:text-rose-200 leading-relaxed">
                           {result.reasonsNotEligible.map((reason, idx) => (
                             <li key={idx}>{reason}</li>
                           ))}
@@ -480,12 +480,12 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
 
                     {/* Potential Blockers / Conditions */}
                     {result.potentialBlockers.length > 0 && (
-                      <div className="bg-amber-50/70 p-3.5 rounded-xl border border-amber-200/80 space-y-1.5">
-                        <div className="flex items-center space-x-1.5 text-xs font-bold text-amber-800">
-                          <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                      <div className="bg-amber-50/70 dark:bg-amber-950/40 p-3.5 rounded-xl border border-amber-200/80 dark:border-amber-800/60 space-y-1.5">
+                        <div className="flex items-center space-x-1.5 text-xs font-bold text-amber-800 dark:text-amber-300">
+                          <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                           <span>{t.potentialBlockersTitle}:</span>
                         </div>
-                        <ul className="space-y-1 pl-5 list-disc text-xs text-amber-900 leading-relaxed">
+                        <ul className="space-y-1 pl-5 list-disc text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
                           {result.potentialBlockers.map((blocker, idx) => (
                             <li key={idx}>{blocker}</li>
                           ))}
@@ -495,12 +495,12 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                   </div>
 
                   {/* Actions Bar */}
-                  <div className="mt-5 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                  <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <button
                         id={`btn-view-details-${scheme.id}`}
                         onClick={() => onSelectSchemeDetails(scheme)}
-                        className="px-3.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs transition"
+                        className="px-3.5 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/80 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-semibold text-xs transition cursor-pointer"
                       >
                         {t.viewDetails}
                       </button>
@@ -508,58 +508,58 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                       <button
                         id={`btn-checklist-${scheme.id}`}
                         onClick={() => onOpenChecklist(scheme)}
-                        className="flex items-center space-x-1 px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition"
+                        className="flex items-center space-x-1 px-3.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs transition cursor-pointer"
                       >
-                        <FileCheck className="w-3.5 h-3.5 text-slate-500" />
+                        <FileCheck className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                         <span>{t.generateChecklist}</span>
                       </button>
 
                       <button
                         id={`btn-locate-${scheme.id}`}
                         onClick={() => onOpenLocator(scheme)}
-                        className="flex items-center space-x-1 px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition"
+                        className="flex items-center space-x-1 px-3.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs transition cursor-pointer"
                       >
-                        <MapPin className="w-3.5 h-3.5 text-slate-500" />
+                        <MapPin className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                         <span>{t.locateBranches}</span>
                       </button>
 
                       <button
                         id={`btn-compare-${scheme.id}`}
                         onClick={() => onAddToCompare(scheme)}
-                        className="flex items-center space-x-1 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs transition"
+                        className="flex items-center space-x-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs transition cursor-pointer"
                       >
                         <Scale className="w-3.5 h-3.5 text-slate-400" />
                         <span>Compare</span>
                       </button>
 
-                      {/* Saved Scheme Bookmark Toggle (STEP 8) */}
+                      {/* Saved Scheme Bookmark Toggle */}
                       <button
                         id={`btn-save-match-${scheme.id}`}
                         onClick={(e) => handleToggleSave(scheme.id, e)}
-                        className={`flex items-center space-x-1 px-3 py-1.5 rounded-lg border text-xs transition ${
+                        className={`flex items-center space-x-1 px-3 py-1.5 rounded-lg border text-xs transition cursor-pointer ${
                           savedIds.includes(scheme.id)
-                            ? 'border-amber-300 bg-amber-50 text-amber-700 font-bold'
-                            : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                            ? 'border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-bold'
+                            : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
                         }`}
                         title={savedIds.includes(scheme.id) ? "Saved in Bookmarks" : "Save Scheme"}
                       >
                         {savedIds.includes(scheme.id) ? (
                           <>
-                            <BookmarkCheck className="w-3.5 h-3.5 text-amber-600" />
+                            <BookmarkCheck className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                             <span>Saved</span>
                           </>
                         ) : (
                           <>
-                            <Bookmark className="w-3.5 h-3.5 text-slate-400" />
+                            <Bookmark className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                             <span>Save</span>
                           </>
                         )}
                       </button>
 
-                      {/* Expand Rule Matrix (STEP 6) */}
+                      {/* Expand Rule Matrix */}
                       <button
                         onClick={() => setExpandedSchemeId(isExpanded ? null : scheme.id)}
-                        className="flex items-center space-x-1 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs transition"
+                        className="flex items-center space-x-1 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs transition cursor-pointer"
                       >
                         <span>{isExpanded ? "Hide Rules" : "Inspect Rule Breakdown"}</span>
                         {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
@@ -570,62 +570,62 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                       href={scheme.sourceUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-slate-400 hover:text-indigo-600 text-[11px] flex items-center space-x-1"
+                      className="text-slate-400 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-300 text-[11px] flex items-center space-x-1"
                     >
                       <span>Official MoSJE Guidelines</span>
                       <ExternalLink className="w-3 h-3" />
                     </a>
                   </div>
 
-                  {/* Expandable Deterministic Rule Breakdown (STEP 6) */}
+                  {/* Expandable Deterministic Rule Breakdown */}
                   {isExpanded && (
-                    <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-3">
+                    <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-850 rounded-xl border border-slate-200 dark:border-slate-800 text-xs space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
+                        <span className="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[11px]">
                           Deterministic Rule Engine Audit Breakdown
                         </span>
-                        <span className="text-[10px] font-mono text-slate-500">
+                        <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
                           Scheme Code: {scheme.code} | Status: {result.status.toUpperCase()}
                         </span>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                        <div className="p-2 bg-white rounded-lg border border-slate-200">
-                          <span className="text-slate-400 block text-[10px]">Beneficiary Target Category</span>
-                          <span className="font-semibold text-slate-800">{scheme.rules.eligibleCategories.join(', ')}</span>
-                          <span className="block text-[10px] mt-0.5 text-emerald-600 font-medium">
+                        <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
+                          <span className="text-slate-400 dark:text-slate-500 block text-[10px]">Beneficiary Target Category</span>
+                          <span className="font-semibold text-slate-800 dark:text-slate-200">{scheme.rules.eligibleCategories.join(', ')}</span>
+                          <span className="block text-[10px] mt-0.5 text-emerald-600 dark:text-emerald-400 font-medium">
                             Applicant ({profile.category}): {scheme.rules.eligibleCategories.includes(profile.category) ? '✓ Matched' : '✗ Category Ineligible'}
                           </span>
                         </div>
 
-                        <div className="p-2 bg-white rounded-lg border border-slate-200">
-                          <span className="text-slate-400 block text-[10px]">Age Range Permitted</span>
-                          <span className="font-semibold text-slate-800">{scheme.rules.minAge} to {scheme.rules.maxAge} years</span>
-                          <span className="block text-[10px] mt-0.5 text-emerald-600 font-medium">
+                        <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
+                          <span className="text-slate-400 dark:text-slate-500 block text-[10px]">Age Range Permitted</span>
+                          <span className="font-semibold text-slate-800 dark:text-slate-200">{scheme.rules.minAge} to {scheme.rules.maxAge} years</span>
+                          <span className="block text-[10px] mt-0.5 text-emerald-600 dark:text-emerald-400 font-medium">
                             Applicant ({profile.age} yrs): {profile.age >= scheme.rules.minAge && profile.age <= scheme.rules.maxAge ? '✓ Within Limits' : '✗ Out of Range'}
                           </span>
                         </div>
 
-                        <div className="p-2 bg-white rounded-lg border border-slate-200">
-                          <span className="text-slate-400 block text-[10px]">Max Credit Limit</span>
-                          <span className="font-semibold text-slate-800">{formatIndianCurrency(scheme.rules.maxLoanAmount, true)}</span>
-                          <span className="block text-[10px] mt-0.5 font-medium text-slate-700">
+                        <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
+                          <span className="text-slate-400 dark:text-slate-500 block text-[10px]">Max Credit Limit</span>
+                          <span className="font-semibold text-slate-800 dark:text-slate-200">{formatIndianCurrency(scheme.rules.maxLoanAmount, true)}</span>
+                          <span className="block text-[10px] mt-0.5 font-medium text-slate-700 dark:text-slate-300">
                             Requested: {formatIndianCurrency(profile.requestedLoanAmount, true)} ({profile.requestedLoanAmount <= scheme.rules.maxLoanAmount ? '✓ Within Limit' : '⚠ Exceeds Scheme Max'})
                           </span>
                         </div>
 
-                        <div className="p-2 bg-white rounded-lg border border-slate-200">
-                          <span className="text-slate-400 block text-[10px]">Income Ceiling Criteria</span>
-                          <span className="font-semibold text-slate-800">
+                        <div className="p-2 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
+                          <span className="text-slate-400 dark:text-slate-500 block text-[10px]">Income Ceiling Criteria</span>
+                          <span className="font-semibold text-slate-800 dark:text-slate-200">
                             {scheme.rules.maxAnnualIncome === 0 ? 'No Ceiling (Waiver Active)' : formatIndianCurrency(scheme.rules.maxAnnualIncome, true)}
                           </span>
-                          <span className="block text-[10px] mt-0.5 font-medium text-slate-700">
+                          <span className="block text-[10px] mt-0.5 font-medium text-slate-700 dark:text-slate-300">
                             Declared Income: {formatIndianCurrency(profile.annualFamilyIncome, true)} ({scheme.rules.maxAnnualIncome === 0 || profile.annualFamilyIncome <= scheme.rules.maxAnnualIncome ? '✓ Eligible' : '✗ Exceeds Ceiling'})
                           </span>
                         </div>
                       </div>
 
-                      <div className="text-[11px] text-slate-500 pt-1">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 pt-1">
                         Required Documents ({scheme.documents.length}): {scheme.documents.map(d => d.title).join(', ')}
                       </div>
                     </div>

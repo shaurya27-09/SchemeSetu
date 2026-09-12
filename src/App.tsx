@@ -15,8 +15,10 @@ import { EmiCalculatorPage } from './components/views/EmiCalculatorPage';
 import { DocumentChecklistView } from './components/views/DocumentChecklistView';
 import { BranchLocatorView } from './components/views/BranchLocatorView';
 import { AllSchemesView } from './components/views/AllSchemesView';
-import { AdminDashboard } from './components/views/AdminDashboard';
+import { SavedSchemesView } from './components/views/SavedSchemesView';
 import { SchemeMitraModal } from './components/views/SchemeMitraModal';
+import { AuthModal } from './components/auth/AuthModal';
+import { UserProfileModal } from './components/profile/UserProfileModal';
 
 import { ApplicantProfile, Scheme } from './types';
 import { Language } from './utils/translations';
@@ -37,6 +39,8 @@ export default function App() {
   const [activeSchemeForChecklist, setActiveSchemeForChecklist] = useState<Scheme | null>(null);
   const [activeSchemeForEmi, setActiveSchemeForEmi] = useState<Scheme | null>(null);
   const [isMitraOpen, setIsMitraOpen] = useState<boolean>(false);
+  const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
+  const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
 
   // Scheme comparison state (up to 3 schemes)
   const [comparedSchemes, setComparedSchemes] = useState<Scheme[]>(() => {
@@ -75,13 +79,19 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleOpenEmi = (scheme: Scheme) => {
+    setActiveSchemeForEmi(scheme);
+    setCurrentView('emi');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleOpenLocator = (scheme: Scheme) => {
     setCurrentView('branches');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-sans text-slate-800 dark:text-slate-100 antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-200">
       {/* Navigation Bar */}
       <Navbar
         currentView={currentView}
@@ -92,6 +102,8 @@ export default function App() {
         language={language}
         setLanguage={setLanguage}
         onOpenMitra={() => setIsMitraOpen(true)}
+        onOpenAuth={() => setIsAuthOpen(true)}
+        onOpenProfile={() => setIsProfileOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -130,16 +142,16 @@ export default function App() {
         )}
 
         {currentView === 'results' && !applicantProfile && (
-          <div className="max-w-xl mx-auto my-16 p-8 bg-white rounded-2xl border border-slate-200 text-center space-y-4">
-            <h2 className="text-xl font-bold text-slate-900">Please complete the questionnaire first</h2>
-            <p className="text-xs text-slate-500">
+          <div className="max-w-xl mx-auto my-16 p-8 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-sm">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">Please complete the questionnaire first</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               To evaluate statutory eligibility, we require your target category, budget, and location.
             </p>
             <button
               onClick={() => setCurrentView('wizard')}
-              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-sm"
+              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white rounded-xl font-bold text-xs shadow-sm cursor-pointer"
             >
-              Start Questionnaire
+              Start Eligibility Questionnaire
             </button>
           </div>
         )}
@@ -149,7 +161,20 @@ export default function App() {
             language={language}
             onSelectSchemeDetails={(scheme) => setModalScheme(scheme)}
             onOpenChecklist={handleOpenChecklist}
+            onOpenLocator={handleOpenLocator}
             onAddToCompare={handleAddToCompare}
+            onCheckEligibility={() => setCurrentView('wizard')}
+          />
+        )}
+
+        {currentView === 'saved' && (
+          <SavedSchemesView
+            language={language}
+            onSelectSchemeDetails={(scheme) => setModalScheme(scheme)}
+            onOpenChecklist={handleOpenChecklist}
+            onOpenEmi={handleOpenEmi}
+            onAddToCompare={handleAddToCompare}
+            onExploreSchemes={() => setCurrentView('schemes')}
             onCheckEligibility={() => setCurrentView('wizard')}
           />
         )}
@@ -157,15 +182,12 @@ export default function App() {
         {currentView === 'compare' && (
           <SchemeCompare
             language={language}
-            selectedSchemes={comparedSchemes}
+            comparedSchemes={comparedSchemes}
             onRemoveScheme={handleRemoveFromCompare}
-            onAddScheme={(scheme) => {
-              if (comparedSchemes.length < 3) {
-                setComparedSchemes([...comparedSchemes, scheme]);
-              }
-            }}
             onSelectSchemeDetails={(scheme) => setModalScheme(scheme)}
             onOpenChecklist={handleOpenChecklist}
+            onOpenLocator={handleOpenLocator}
+            onExploreSchemes={() => setCurrentView('schemes')}
           />
         )}
 
@@ -190,25 +212,34 @@ export default function App() {
             language={language}
           />
         )}
-
-        {currentView === 'admin' && (
-          <AdminDashboard
-            language={language}
-            onSelectSchemeDetails={(scheme) => setModalScheme(scheme)}
-          />
-        )}
       </main>
 
       {/* Floating Action Button for Scheme Mitra AI on mobile / bottom right */}
       <button
         id="btn-fab-scheme-mitra"
         onClick={() => setIsMitraOpen(true)}
-        className="fixed bottom-6 right-6 z-30 flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-3 rounded-full shadow-xl shadow-orange-500/20 font-bold text-xs transition transform hover:scale-105 no-print"
+        className="fixed bottom-6 right-6 z-30 flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-3 rounded-full shadow-xl shadow-orange-500/20 font-bold text-xs transition transform hover:scale-105 no-print cursor-pointer"
         title="Chat with Scheme Mitra AI Assistant"
       >
         <Sparkles className="w-4 h-4 text-amber-200" />
         <span>Ask Scheme Mitra</span>
       </button>
+
+      {/* Citizen Profile Modal */}
+      <UserProfileModal
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+        onNavigate={(view) => {
+          setCurrentView(view);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
+
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+      />
 
       {/* Scheme Details Modal */}
       <SchemeDetailsModal

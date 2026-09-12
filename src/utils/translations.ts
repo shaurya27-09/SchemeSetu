@@ -12,7 +12,7 @@ export const TRANSLATIONS = {
     navEmiCalculator: "EMI Calculator",
     navBranchLocator: "Branch Locator",
     navDocuments: "Checklist",
-    navAdmin: "Admin Portal",
+    navSaved: "Saved Schemes",
     
     // Landing Page
     heroBadge: "Smart India Hackathon SIH26092 Initiative",
@@ -115,7 +115,7 @@ export const TRANSLATIONS = {
     navEmiCalculator: "ईएमआई कैलकुलेटर",
     navBranchLocator: "शाखा खोजें",
     navDocuments: "दस्तावेज़ चेकलिस्ट",
-    navAdmin: "प्रशासक पोर्टल",
+    navSaved: "सहेजी गई योजनाएं",
 
     // Landing Page
     heroBadge: "स्मार्ट इंडिया हैकाथॉन (SIH26092) पहल",

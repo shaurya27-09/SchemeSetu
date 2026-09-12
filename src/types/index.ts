@@ -188,23 +188,10 @@ export interface ChannelPartnerBranch {
   isDemoData: boolean;
 }
 
-export interface AdminAuditLog {
-  id: string;
-  timestamp: string;
-  adminUser: string;
-  action: 'UPDATE_RULE' | 'CREATE_SCHEME' | 'DEACTIVATE_SCHEME' | 'UPDATE_TERMS';
-  targetSchemeId: string;
-  schemeName: string;
-  fieldChanged: string;
-  previousValue: string | number;
-  newValue: string | number;
-  reason: string;
-}
-
 export interface UserAccount {
   id: string;
   email: string;
-  role: 'entrepreneur' | 'admin';
+  role: 'user' | 'entrepreneur';
   name: string;
   createdAt: string;
 }

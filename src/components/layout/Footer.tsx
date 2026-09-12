@@ -63,36 +63,41 @@ export const Footer: React.FC<FooterProps> = ({ language, onNavigate }) => {
 
         {/* Quick Tools */}
         <div>
-          <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-3">Quick Navigation</h4>
+          <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-3">Citizen Services</h4>
           <ul className="space-y-2 text-xs">
             <li>
-              <button onClick={() => onNavigate('wizard')} className="hover:text-white transition">
+              <button onClick={() => onNavigate('wizard')} className="hover:text-white transition cursor-pointer">
                 Smart Eligibility Wizard
               </button>
             </li>
             <li>
-              <button onClick={() => onNavigate('schemes')} className="hover:text-white transition">
+              <button onClick={() => onNavigate('schemes')} className="hover:text-white transition cursor-pointer">
                 All MoSJE Credit Schemes
               </button>
             </li>
             <li>
-              <button onClick={() => onNavigate('compare')} className="hover:text-white transition">
+              <button onClick={() => onNavigate('compare')} className="hover:text-white transition cursor-pointer">
                 Scheme Comparison Matrix
               </button>
             </li>
             <li>
-              <button onClick={() => onNavigate('emi')} className="hover:text-white transition">
+              <button onClick={() => onNavigate('emi')} className="hover:text-white transition cursor-pointer">
                 Reducing-Balance EMI Calculator
               </button>
             </li>
             <li>
-              <button onClick={() => onNavigate('branches')} className="hover:text-white transition">
+              <button onClick={() => onNavigate('branches')} className="hover:text-white transition cursor-pointer">
                 State Channel Partner Locator
               </button>
             </li>
             <li>
-              <button onClick={() => onNavigate('admin')} className="hover:text-amber-400 transition text-amber-300 font-medium">
-                Admin Rules Engine (Officer Portal)
+              <button onClick={() => onNavigate('saved')} className="hover:text-white transition cursor-pointer text-amber-300">
+                Saved & Bookmarked Schemes
+              </button>
+            </li>
+            <li>
+              <button onClick={() => onNavigate('documents')} className="hover:text-white transition cursor-pointer">
+                Document Checklist & Dossier
               </button>
             </li>
           </ul>

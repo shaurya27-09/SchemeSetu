@@ -69,29 +69,29 @@ export const AllSchemesView: React.FC<AllSchemesViewProps> = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200">
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/80 px-2.5 py-1 rounded-full border border-indigo-200 dark:border-indigo-800">
               Official MoSJE Directory
             </span>
-            <span className="text-xs text-slate-500 font-mono">
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
               {allSchemes.length} Active Credit Schemes
             </span>
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 mt-2">
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white mt-2">
             All Credit & Entrepreneurship Schemes
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Browse verified concessional loan schemes operated by NSFDC, NBCFDC, and NSKFDC.
           </p>
         </div>
 
         <button
           onClick={onCheckEligibility}
-          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-200 transition"
+          className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-bold text-xs shadow-md shadow-indigo-200 dark:shadow-none transition cursor-pointer"
         >
           <span>{t.startEligibilityBtn}</span>
           <ArrowRight className="w-4 h-4" />
@@ -99,21 +99,25 @@ export const AllSchemesView: React.FC<AllSchemesViewProps> = ({
       </div>
 
       {/* Filter Controls */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 transition-colors">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setOnlySaved(false)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                !onlySaved ? 'bg-indigo-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                !onlySaved 
+                  ? 'bg-indigo-600 text-white shadow-xs' 
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
               All Schemes ({allSchemes.length})
             </button>
             <button
               onClick={() => setOnlySaved(true)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 ${
-                onlySaved ? 'bg-amber-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer ${
+                onlySaved 
+                  ? 'bg-amber-600 text-white shadow-xs' 
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
               <Bookmark className="w-3.5 h-3.5" />
@@ -121,21 +125,21 @@ export const AllSchemesView: React.FC<AllSchemesViewProps> = ({
             </button>
           </div>
 
-          <span className="text-xs text-slate-500">
-            Showing <strong>{filtered.length}</strong> matching schemes
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            Showing <strong className="text-slate-800 dark:text-slate-200">{filtered.length}</strong> matching schemes
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Search */}
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+            <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400 dark:text-slate-500" />
             <input
               type="text"
               placeholder="Search by scheme name or keywords..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500"
+              className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 text-xs focus:ring-2 focus:ring-indigo-500"
             />
           </div>
 
@@ -144,7 +148,7 @@ export const AllSchemesView: React.FC<AllSchemesViewProps> = ({
             <select
               value={selectedCorp}
               onChange={(e) => setSelectedCorp(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs text-slate-700 font-medium"
+              className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-700 dark:text-slate-200 font-medium"
             >
               <option value="All">All Apex Corporations (NSFDC, NBCFDC, NSKFDC)</option>
               <option value="NSFDC">NSFDC (Scheduled Castes)</option>
@@ -158,7 +162,7 @@ export const AllSchemesView: React.FC<AllSchemesViewProps> = ({
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs text-slate-700 font-medium"
+              className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-700 dark:text-slate-200 font-medium"
             >
               <option value="All">All Target Beneficiaries</option>
               <option value="SC">Scheduled Caste (SC)</option>
@@ -175,61 +179,61 @@ export const AllSchemesView: React.FC<AllSchemesViewProps> = ({
         {filtered.map(scheme => (
           <div
             key={scheme.id}
-            className="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition flex flex-col justify-between p-6"
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:shadow-md dark:hover:border-slate-700 transition flex flex-col justify-between p-6"
           >
             <div className="space-y-3">
               {/* Corporation & Code */}
               <div className="flex items-center justify-between">
                 <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
-                  scheme.corporation === 'NSFDC' ? 'bg-blue-100 text-blue-800' :
-                  scheme.corporation === 'NBCFDC' ? 'bg-amber-100 text-amber-800' :
-                  'bg-emerald-100 text-emerald-800'
+                  scheme.corporation === 'NSFDC' ? 'bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300' :
+                  scheme.corporation === 'NBCFDC' ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300' :
+                  'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300'
                 }`}>
                   {scheme.corporation}
                 </span>
-                <span className="text-xs font-mono text-slate-400">{scheme.code}</span>
+                <span className="text-xs font-mono text-slate-400 dark:text-slate-500">{scheme.code}</span>
               </div>
 
               {/* Title */}
               <h3 
                 onClick={() => onSelectSchemeDetails(scheme)}
-                className="text-base font-bold text-slate-900 hover:text-indigo-600 transition cursor-pointer leading-snug"
+                className="text-base font-bold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition cursor-pointer leading-snug"
               >
                 {language === 'hi' ? scheme.nameHi : scheme.name}
               </h3>
 
-              <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+              <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
                 {language === 'hi' ? scheme.descriptionHi : scheme.description}
               </p>
 
               {/* Financial Metrics */}
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs">
-                <div className="p-2.5 bg-slate-50 rounded-xl">
-                  <span className="text-[11px] text-slate-400 block">Interest Rate:</span>
-                  <span className="font-bold text-emerald-700">{scheme.terms.interestRateMin}% – {scheme.terms.interestRateMax}%</span>
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
+                <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
+                  <span className="text-[11px] text-slate-400 dark:text-slate-400 block">Interest Rate:</span>
+                  <span className="font-bold text-emerald-700 dark:text-emerald-400">{scheme.terms.interestRateMin}% – {scheme.terms.interestRateMax}%</span>
                 </div>
-                <div className="p-2.5 bg-slate-50 rounded-xl">
-                  <span className="text-[11px] text-slate-400 block">Max Loan:</span>
-                  <span className="font-bold text-slate-900">{formatIndianCurrency(scheme.rules.maxLoanAmount, true)}</span>
+                <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl">
+                  <span className="text-[11px] text-slate-400 dark:text-slate-400 block">Max Loan:</span>
+                  <span className="font-bold text-slate-900 dark:text-white">{formatIndianCurrency(scheme.rules.maxLoanAmount, true)}</span>
                 </div>
               </div>
 
               {/* Concession tags */}
               <div className="flex flex-wrap gap-1.5 pt-1">
                 {scheme.terms.rebateForWomenPercent > 0 && (
-                  <span className="text-[10px] font-bold bg-pink-50 text-pink-700 px-2 py-0.5 rounded-md border border-pink-100">
+                  <span className="text-[10px] font-bold bg-pink-50 dark:bg-pink-950/60 text-pink-700 dark:text-pink-300 px-2 py-0.5 rounded-md border border-pink-100 dark:border-pink-900/60">
                     {scheme.terms.rebateForWomenPercent}% Women Rebate
                   </span>
                 )}
-                <span className="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">
+                <span className="text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-md">
                   {scheme.terms.tenureYearsMax} Yrs Tenure
                 </span>
                 {scheme.rules.maxAnnualIncome === 0 ? (
-                  <span className="text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md">
+                  <span className="text-[10px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-md">
                     No Income Ceiling
                   </span>
                 ) : (
-                  <span className="text-[10px] font-semibold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">
+                  <span className="text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-md">
                     Ceiling: {formatIndianCurrency(scheme.rules.maxAnnualIncome, true)}
                   </span>
                 )}
@@ -237,10 +241,10 @@ export const AllSchemesView: React.FC<AllSchemesViewProps> = ({
             </div>
 
             {/* Actions */}
-            <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+            <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
               <button
                 onClick={() => onSelectSchemeDetails(scheme)}
-                className="text-xs font-semibold text-indigo-600 hover:text-indigo-800"
+                className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 cursor-pointer"
               >
                 View Details →
               </button>
@@ -249,29 +253,29 @@ export const AllSchemesView: React.FC<AllSchemesViewProps> = ({
                 <button
                   id={`btn-save-scheme-${scheme.id}`}
                   onClick={(e) => handleToggleSave(scheme.id, e)}
-                  className={`p-1.5 rounded-lg border text-xs transition ${
+                  className={`p-1.5 rounded-lg border text-xs transition cursor-pointer ${
                     savedIds.includes(scheme.id)
-                      ? 'border-amber-300 bg-amber-50 text-amber-600'
-                      : 'border-slate-200 text-slate-400 hover:text-amber-600 hover:bg-slate-50'
+                      ? 'border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400'
+                      : 'border-slate-200 dark:border-slate-700 text-slate-400 hover:text-amber-600 hover:bg-slate-50 dark:hover:bg-slate-800'
                   }`}
                   title={savedIds.includes(scheme.id) ? "Remove from Saved" : "Save Scheme"}
                 >
                   {savedIds.includes(scheme.id) ? (
-                    <BookmarkCheck className="w-3.5 h-3.5 text-amber-600" />
+                    <BookmarkCheck className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                   ) : (
                     <Bookmark className="w-3.5 h-3.5" />
                   )}
                 </button>
                 <button
                   onClick={() => onAddToCompare(scheme)}
-                  className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 text-xs"
+                  className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs cursor-pointer"
                   title="Add to Compare"
                 >
                   <Scale className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => onOpenChecklist(scheme)}
-                  className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 text-xs"
+                  className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs cursor-pointer"
                   title="Document Checklist"
                 >
                   <FileText className="w-3.5 h-3.5" />

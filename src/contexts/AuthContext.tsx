@@ -27,29 +27,28 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: UserProfileData | null;
-  role: 'entrepreneur' | 'admin';
+  role: 'user';
   loading: boolean;
   error: string | null;
   isDemoUser: boolean;
   signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  signUp: (email: string, password: string, fullName: string, role?: 'entrepreneur' | 'admin') => Promise<{ success: boolean; error?: string; requiresVerification?: boolean }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ success: boolean; error?: string; requiresVerification?: boolean }>;
   signOut: () => Promise<void>;
   updateProfile: (data: Partial<UserProfileData>) => Promise<{ success: boolean; error?: string }>;
   refreshProfile: () => Promise<void>;
-  setDemoUser: (role: 'entrepreneur' | 'admin') => void;
+  setDemoUser: () => void;
   clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const DEMO_USER_ID_ENTREPRENEUR = '11111111-2222-3333-4444-555555555555';
-const DEMO_USER_ID_ADMIN = '99999999-8888-7777-6666-555555555555';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfileData | null>(null);
-  const [role, setRole] = useState<'entrepreneur' | 'admin'>('entrepreneur');
+  const [role, setRole] = useState<'user'>('user');
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isDemoUser, setIsDemoUser] = useState<boolean>(false);
@@ -96,7 +95,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         await loadUserProfileAndRole(newSession.user.id);
       } else if (!isDemoUser) {
         setProfile(null);
-        setRole('entrepreneur');
+        setRole('user');
       }
     });
 
@@ -109,16 +108,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Fetch profile and role from Supabase tables
   const loadUserProfileAndRole = async (userId: string) => {
     try {
-      // 1. Fetch user role from `user_roles`
+      // 1. Fetch user role from `user_roles` (kept for database schema compatibility)
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
         .maybeSingle();
 
-      if (!roleError && roleData?.role) {
-        setRole(roleData.role === 'admin' ? 'admin' : 'entrepreneur');
-      }
+      // All authenticated members are treated as normal users
+      setRole('user');
 
       // 2. Fetch profile from `profiles`
       const { data: profileData, error: profileError } = await supabase
@@ -167,12 +165,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Sign Up
+  // Sign Up - All signups are automatically normal users
   const signUp = async (
     email: string,
     password: string,
-    fullName: string,
-    selectedRole: 'entrepreneur' | 'admin' = 'entrepreneur'
+    fullName: string
   ) => {
     setError(null);
     setLoading(true);
@@ -183,7 +180,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         options: {
           data: {
             full_name: fullName.trim(),
-            role: selectedRole,
+            role: 'user',
           },
         },
       });
@@ -199,13 +196,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           await supabase.from('profiles').upsert({
             id: data.user.id,
             full_name: fullName.trim(),
-            role: selectedRole,
+            role: 'user',
             updated_at: new Date().toISOString(),
           }, { onConflict: 'id' });
 
           await supabase.from('user_roles').upsert({
             user_id: data.user.id,
-            role: selectedRole,
+            role: 'user',
             updated_at: new Date().toISOString(),
           }, { onConflict: 'user_id' });
         } catch (dbErr) {
@@ -249,14 +246,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(null);
       setSession(null);
       setProfile(null);
-      setRole('entrepreneur');
+      setRole('user');
       setIsDemoUser(false);
     }
   };
 
   // Update Profile
   const updateProfile = async (data: Partial<UserProfileData>) => {
-    const activeUserId = user?.id || (isDemoUser ? (role === 'admin' ? DEMO_USER_ID_ADMIN : DEMO_USER_ID_ENTREPRENEUR) : null);
+    const activeUserId = user?.id || (isDemoUser ? DEMO_USER_ID_ENTREPRENEUR : null);
     
     if (!activeUserId) {
       return { success: false, error: 'User is not authenticated' };
@@ -293,19 +290,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  // Preset demo personas for judges and hackathon evaluation
-  const setDemoUser = (selectedRole: 'entrepreneur' | 'admin') => {
+  // Preset demo user for quick evaluation
+  const setDemoUser = () => {
     setIsDemoUser(true);
-    setRole(selectedRole);
+    setRole('user');
 
-    const mockId = selectedRole === 'admin' ? DEMO_USER_ID_ADMIN : DEMO_USER_ID_ENTREPRENEUR;
-    const mockEmail = selectedRole === 'admin' ? 'nodal.officer@mosje.gov.in' : 'rameshwar.sc@entrepreneur.in';
-    const mockName = selectedRole === 'admin' ? 'MoSJE Nodal Officer (Admin)' : 'Rameshwar Kumar';
+    const mockId = DEMO_USER_ID_ENTREPRENEUR;
+    const mockEmail = 'rameshwar.sc@entrepreneur.in';
+    const mockName = 'Rameshwar Kumar';
 
     const mockUser: any = {
       id: mockId,
       email: mockEmail,
-      user_metadata: { full_name: mockName, role: selectedRole },
+      user_metadata: { full_name: mockName, role: 'user' },
       app_metadata: {},
       aud: 'authenticated',
       created_at: new Date().toISOString(),

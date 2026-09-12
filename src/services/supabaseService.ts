@@ -6,8 +6,7 @@ import {
   SchemeTerms, 
   SchemeDocument, 
   EligibilityResult,
-  ChannelPartnerBranch,
-  AdminAuditLog
+  ChannelPartnerBranch
 } from '../types';
 import { INITIAL_SCHEMES, INITIAL_BRANCHES } from '../data/seedSchemes';
 
@@ -547,94 +546,4 @@ export async function getBranchesFromDb(state?: string): Promise<ChannelPartnerB
   }
 
   return INITIAL_BRANCHES;
-}
-
-// ============================================================================
-// 8. ADMIN AUDIT LOGS (STEP 14)
-// ============================================================================
-
-export async function getAdminAuditLogs(): Promise<AdminAuditLog[]> {
-  try {
-    const { data, error } = await supabase
-      .from('admin_audit_logs')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (!error && data && data.length > 0) {
-      return data.map((d: any) => ({
-        id: d.id,
-        timestamp: d.created_at,
-        adminUser: d.admin_user || 'MoSJE Admin',
-        action: d.action as any,
-        targetSchemeId: d.target_scheme_id || '',
-        schemeName: d.scheme_name || 'Scheme Rule Update',
-        fieldChanged: d.field_changed || 'rule',
-        previousValue: d.previous_value || '',
-        newValue: d.new_value || '',
-        reason: d.reason || 'Statutory Gazetted Revision'
-      }));
-    }
-  } catch (err) {
-    console.warn('[SupabaseService] getAdminAuditLogs note:', err);
-  }
-
-  try {
-    const stored = localStorage.getItem('schemesetu_admin_audit_v1');
-    if (stored) return JSON.parse(stored);
-  } catch {}
-
-  return [
-    {
-      id: 'audit-01',
-      timestamp: new Date(Date.now() - 86400000 * 3).toISOString(),
-      adminUser: 'MoSJE Nodal Officer (Admin)',
-      action: 'UPDATE_RULE',
-      targetSchemeId: '2f436aa2-688e-4a23-9ccf-770fcd184c02',
-      schemeName: 'NSFDC Micro Finance Scheme',
-      fieldChanged: 'maxAnnualIncome',
-      previousValue: '300000',
-      newValue: '500000',
-      reason: 'Statutory income ceiling alignment with 2026 MoSJE Guidelines.'
-    },
-    {
-      id: 'audit-02',
-      timestamp: new Date(Date.now() - 86400000 * 7).toISOString(),
-      adminUser: 'MoSJE IT Cell',
-      action: 'UPDATE_TERMS',
-      targetSchemeId: 'd0e38679-07cf-4904-86b1-007aae9adbce',
-      schemeName: 'NSFDC Udyam Nidhi Yojana',
-      fieldChanged: 'interestRateMin',
-      previousValue: '6.5%',
-      newValue: '5.0%',
-      reason: '1% affirmative subvention implemented for verified women SHG clusters.'
-    }
-  ];
-}
-
-export async function logAdminAuditAction(log: Omit<AdminAuditLog, 'id' | 'timestamp'>): Promise<void> {
-  const newEntry: AdminAuditLog = {
-    id: `audit-${Date.now()}`,
-    timestamp: new Date().toISOString(),
-    ...log
-  };
-
-  try {
-    await supabase.from('admin_audit_logs').insert({
-      admin_user: log.adminUser,
-      action: log.action,
-      target_scheme_id: log.targetSchemeId,
-      scheme_name: log.schemeName,
-      field_changed: log.fieldChanged,
-      previous_value: String(log.previousValue),
-      new_value: String(log.newValue),
-      reason: log.reason
-    });
-  } catch (err) {
-    console.warn('[SupabaseService] logAdminAuditAction note:', err);
-  }
-
-  try {
-    const existing = await getAdminAuditLogs();
-    localStorage.setItem('schemesetu_admin_audit_v1', JSON.stringify([newEntry, ...existing]));
-  } catch {}
 }

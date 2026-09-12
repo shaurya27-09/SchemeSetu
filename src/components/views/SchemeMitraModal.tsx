@@ -136,10 +136,10 @@ export const SchemeMitraModal: React.FC<SchemeMitraModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-end">
-      <div className="bg-white w-full max-w-lg h-full shadow-2xl flex flex-col border-l border-slate-200">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-end animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-slate-900 w-full max-w-lg h-full shadow-2xl flex flex-col border-l border-slate-200 dark:border-slate-800 transition-colors">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-900 to-slate-900 text-white p-4 flex items-center justify-between border-b border-indigo-800">
+        <div className="bg-gradient-to-r from-indigo-950 to-slate-900 text-white p-4 flex items-center justify-between border-b border-indigo-900/80">
           <div className="flex items-center space-x-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-slate-950 font-black shadow-md">
               <Sparkles className="w-5 h-5 text-slate-950" />
@@ -159,49 +159,49 @@ export const SchemeMitraModal: React.FC<SchemeMitraModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition"
+            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Security / Deterministic Notice Banner */}
-        <div className="bg-slate-100 px-4 py-2 text-[11px] text-slate-600 flex items-center justify-between border-b border-slate-200">
+        <div className="bg-slate-100 dark:bg-slate-850 px-4 py-2 text-[11px] text-slate-600 dark:text-slate-300 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
           <span className="flex items-center space-x-1">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>Answers grounded in verified MoSJE notifications</span>
           </span>
-          <span className="text-slate-400 font-mono text-[10px]">Server-Side Secure</span>
+          <span className="text-slate-400 dark:text-slate-500 font-mono text-[10px]">Server-Side Secure</span>
         </div>
 
         {/* Chat Messages Log */}
-        <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50/50 text-xs">
+        <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50/50 dark:bg-slate-900/50 text-xs">
           {messages.map((msg) => (
             <div
               key={msg.id}
               className={`flex items-start space-x-2.5 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {msg.sender === 'mitra' && (
-                <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                <div className="w-7 h-7 rounded-lg bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                   <Bot className="w-4 h-4" />
                 </div>
               )}
 
               <div className={`max-w-[82%] rounded-2xl p-3.5 space-y-1 ${
                 msg.sender === 'user'
-                  ? 'bg-indigo-600 text-white rounded-tr-xs shadow-xs'
-                  : 'bg-white border border-slate-200 text-slate-800 rounded-tl-xs shadow-xs leading-relaxed'
+                  ? 'bg-indigo-600 dark:bg-indigo-500 text-white rounded-tr-xs shadow-xs'
+                  : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-tl-xs shadow-xs leading-relaxed'
               }`}>
                 <div className="whitespace-pre-line">{msg.text}</div>
                 <div className={`text-[10px] text-right font-mono ${
-                  msg.sender === 'user' ? 'text-indigo-200' : 'text-slate-400'
+                  msg.sender === 'user' ? 'text-indigo-200' : 'text-slate-400 dark:text-slate-400'
                 }`}>
                   {msg.timestamp}
                 </div>
               </div>
 
               {msg.sender === 'user' && (
-                <div className="w-7 h-7 rounded-lg bg-slate-800 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                <div className="w-7 h-7 rounded-lg bg-slate-800 dark:bg-slate-700 text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
                   <User className="w-4 h-4" />
                 </div>
               )}
@@ -209,8 +209,8 @@ export const SchemeMitraModal: React.FC<SchemeMitraModalProps> = ({
           ))}
 
           {isLoading && (
-            <div className="flex items-center space-x-2 text-slate-400 p-2">
-              <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+            <div className="flex items-center space-x-2 text-slate-400 dark:text-slate-500 p-2">
+              <Loader2 className="w-4 h-4 animate-spin text-indigo-600 dark:text-indigo-400" />
               <span>Scheme Mitra is formulating guidance...</span>
             </div>
           )}
@@ -219,8 +219,8 @@ export const SchemeMitraModal: React.FC<SchemeMitraModalProps> = ({
         </div>
 
         {/* Suggested Quick Prompts */}
-        <div className="p-3 bg-white border-t border-slate-200 space-y-1.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+        <div className="p-3 bg-white dark:bg-slate-850 border-t border-slate-200 dark:border-slate-800 space-y-1.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
             Suggested Guidance Questions:
           </span>
           <div className="flex flex-wrap gap-1.5">
@@ -229,7 +229,7 @@ export const SchemeMitraModal: React.FC<SchemeMitraModalProps> = ({
                 key={idx}
                 onClick={() => handleSend(q)}
                 disabled={isLoading}
-                className="text-[11px] text-left px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 transition border border-slate-200"
+                className="text-[11px] text-left px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 hover:text-indigo-700 dark:hover:text-indigo-300 text-slate-700 dark:text-slate-200 transition border border-slate-200 dark:border-slate-700 cursor-pointer"
               >
                 {q}
               </button>
@@ -238,7 +238,7 @@ export const SchemeMitraModal: React.FC<SchemeMitraModalProps> = ({
         </div>
 
         {/* Message Input Box */}
-        <div className="p-3 bg-white border-t border-slate-200">
+        <div className="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -252,12 +252,12 @@ export const SchemeMitraModal: React.FC<SchemeMitraModalProps> = ({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={isLoading}
-              className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
             <button
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white shadow-xs transition"
+              className="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 disabled:opacity-50 text-white shadow-xs transition cursor-pointer"
             >
               <Send className="w-4 h-4" />
             </button>

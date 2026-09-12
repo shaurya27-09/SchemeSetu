@@ -55,22 +55,22 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
     : null;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in duration-200">
       {/* Header */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200">
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/80 px-2.5 py-1 rounded-full border border-indigo-200 dark:border-indigo-800">
               Comparative Analysis Matrix
             </span>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
               {selectedSchemes.length} of 3 schemes selected
             </span>
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 mt-2">
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white mt-2">
             Scheme Comparison
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Compare statutory borrowing limits, interest concessions, and tenure conditions side-by-side to choose the best credit route.
           </p>
         </div>
@@ -88,7 +88,7 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
                 }
               }}
               defaultValue=""
-              className="px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 bg-white"
+              className="px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500"
             >
               <option value="" disabled>+ Add Scheme to Compare...</option>
               {availableToAdd.map(s => (
@@ -102,46 +102,46 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
       {/* Trade-Off Highlights Box (when >= 2 schemes selected) */}
       {selectedSchemes.length >= 2 && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+          <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-800/60 flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-600 dark:bg-emerald-500 text-white flex items-center justify-center shrink-0">
               <TrendingDown className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] uppercase font-bold text-emerald-800 tracking-wider">Lowest Interest Rate</span>
-              <p className="text-xs font-extrabold text-slate-900 truncate">
+              <span className="text-[10px] uppercase font-bold text-emerald-800 dark:text-emerald-300 tracking-wider">Lowest Interest Rate</span>
+              <p className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
                 {bestRateScheme?.name}
               </p>
-              <span className="text-xs font-black text-emerald-700">
+              <span className="text-xs font-black text-emerald-700 dark:text-emerald-400">
                 {bestRateScheme?.terms.interestRateMin}% p.a.
               </span>
             </div>
           </div>
 
-          <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-200 flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0">
+          <div className="p-4 bg-indigo-50 dark:bg-indigo-950/40 rounded-2xl border border-indigo-200 dark:border-indigo-800/60 flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center shrink-0">
               <TrendingUp className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] uppercase font-bold text-indigo-800 tracking-wider">Highest Funding Limit</span>
-              <p className="text-xs font-extrabold text-slate-900 truncate">
+              <span className="text-[10px] uppercase font-bold text-indigo-800 dark:text-indigo-300 tracking-wider">Highest Funding Limit</span>
+              <p className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
                 {highestFundingScheme?.name}
               </p>
-              <span className="text-xs font-black text-indigo-700">
+              <span className="text-xs font-black text-indigo-700 dark:text-indigo-400">
                 {formatIndianCurrency(highestFundingScheme?.rules.maxLoanAmount || 0, true)}
               </span>
             </div>
           </div>
 
-          <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0">
+          <div className="p-4 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-200 dark:border-amber-800/60 flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-600 dark:bg-amber-500 text-white flex items-center justify-center shrink-0">
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] uppercase font-bold text-amber-800 tracking-wider">Longest Repayment Period</span>
-              <p className="text-xs font-extrabold text-slate-900 truncate">
+              <span className="text-[10px] uppercase font-bold text-amber-800 dark:text-amber-300 tracking-wider">Longest Repayment Period</span>
+              <p className="text-xs font-extrabold text-slate-900 dark:text-white truncate">
                 {longestTenureScheme?.name}
               </p>
-              <span className="text-xs font-black text-amber-800">
+              <span className="text-xs font-black text-amber-800 dark:text-amber-300">
                 {longestTenureScheme?.terms.tenureYearsMax} Years ({longestTenureScheme?.terms.moratoriumMonths}m grace)
               </span>
             </div>
@@ -151,37 +151,37 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
 
       {/* Comparison Grid Table */}
       {selectedSchemes.length === 0 ? (
-        <div className="bg-white p-12 text-center rounded-2xl border border-slate-200 space-y-3">
-          <Scale className="w-8 h-8 text-slate-400 mx-auto" />
-          <h3 className="text-base font-bold text-slate-700">No schemes selected for comparison</h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+        <div className="bg-white dark:bg-slate-900 p-12 text-center rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+          <Scale className="w-8 h-8 text-slate-400 dark:text-slate-500 mx-auto" />
+          <h3 className="text-base font-bold text-slate-700 dark:text-slate-200">No schemes selected for comparison</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
             Choose schemes from the dropdown above or click "Compare" on any scheme card in the results dashboard.
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-x-auto">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="p-4 w-1/4 font-bold text-slate-500 uppercase tracking-wider">
+              <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850">
+                <th className="p-4 w-1/4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Attribute
                 </th>
                 {selectedSchemes.map(s => (
-                  <th key={s.id} className="p-4 w-1/4 font-bold text-slate-900">
+                  <th key={s.id} className="p-4 w-1/4 font-bold text-slate-900 dark:text-white">
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
-                          s.corporation === 'NSFDC' ? 'bg-blue-100 text-blue-800' :
-                          s.corporation === 'NBCFDC' ? 'bg-amber-100 text-amber-800' :
-                          'bg-emerald-100 text-emerald-800'
+                          s.corporation === 'NSFDC' ? 'bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300' :
+                          s.corporation === 'NBCFDC' ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300' :
+                          'bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300'
                         }`}>
                           {s.corporation}
                         </span>
-                        <h4 className="text-sm font-bold text-slate-900 mt-1 leading-snug">{s.name}</h4>
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-1 leading-snug">{s.name}</h4>
                       </div>
                       <button
                         onClick={() => onRemoveScheme(s.id)}
-                        className="text-slate-400 hover:text-rose-600 p-1 transition"
+                        className="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 p-1 transition cursor-pointer"
                         title="Remove from comparison"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -191,12 +191,12 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {/* Max Loan Assistance */}
               <tr>
-                <td className="p-4 font-bold text-slate-700 bg-slate-50/50">Max Loan Limit</td>
+                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-850/50">Max Loan Limit</td>
                 {selectedSchemes.map(s => (
-                  <td key={s.id} className="p-4 font-extrabold text-slate-900 text-sm">
+                  <td key={s.id} className="p-4 font-extrabold text-slate-900 dark:text-white text-sm">
                     {formatIndianCurrency(s.rules.maxLoanAmount, true)}
                   </td>
                 ))}
@@ -204,9 +204,9 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
 
               {/* Interest Rate */}
               <tr>
-                <td className="p-4 font-bold text-slate-700 bg-slate-50/50">Interest Rate Range</td>
+                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-850/50">Interest Rate Range</td>
                 {selectedSchemes.map(s => (
-                  <td key={s.id} className="p-4 font-bold text-emerald-700">
+                  <td key={s.id} className="p-4 font-bold text-emerald-700 dark:text-emerald-400">
                     {s.terms.interestRateMin}% – {s.terms.interestRateMax}% p.a.
                   </td>
                 ))}
@@ -214,9 +214,9 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
 
               {/* Women Concession */}
               <tr>
-                <td className="p-4 font-bold text-slate-700 bg-slate-50/50">Women Entrepreneur Rebate</td>
+                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-850/50">Women Entrepreneur Rebate</td>
                 {selectedSchemes.map(s => (
-                  <td key={s.id} className="p-4 text-slate-700">
+                  <td key={s.id} className="p-4 text-slate-700 dark:text-slate-300">
                     {s.terms.rebateForWomenPercent > 0 
                       ? `${s.terms.rebateForWomenPercent}% Additional Interest Rebate` 
                       : (s.rules.eligibleGenders.length === 1 && s.rules.eligibleGenders[0] === 'female')
@@ -228,9 +228,9 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
 
               {/* Max Tenure */}
               <tr>
-                <td className="p-4 font-bold text-slate-700 bg-slate-50/50">Max Tenure</td>
+                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-850/50">Max Tenure</td>
                 {selectedSchemes.map(s => (
-                  <td key={s.id} className="p-4 font-semibold text-slate-800">
+                  <td key={s.id} className="p-4 font-semibold text-slate-800 dark:text-slate-200">
                     {s.terms.tenureYearsMax} Years ({s.terms.moratoriumMonths} mo. moratorium)
                   </td>
                 ))}
@@ -238,9 +238,9 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
 
               {/* Minimum Margin Money */}
               <tr>
-                <td className="p-4 font-bold text-slate-700 bg-slate-50/50">Promoter Margin Required</td>
+                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-850/50">Promoter Margin Required</td>
                 {selectedSchemes.map(s => (
-                  <td key={s.id} className="p-4 font-semibold text-slate-800">
+                  <td key={s.id} className="p-4 font-semibold text-slate-800 dark:text-slate-200">
                     {s.rules.personalContributionMinPercent === 0 
                       ? "0% (Zero Promoter Contribution)" 
                       : `${s.rules.personalContributionMinPercent}% of project cost`}
@@ -250,9 +250,9 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
 
               {/* Annual Income Limit */}
               <tr>
-                <td className="p-4 font-bold text-slate-700 bg-slate-50/50">Family Income Ceiling</td>
+                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-850/50">Family Income Ceiling</td>
                 {selectedSchemes.map(s => (
-                  <td key={s.id} className="p-4 font-semibold text-slate-800">
+                  <td key={s.id} className="p-4 font-semibold text-slate-800 dark:text-slate-200">
                     {s.rules.maxAnnualIncome === 0 ? "No Income Ceiling" : formatIndianCurrency(s.rules.maxAnnualIncome)}
                   </td>
                 ))}
@@ -260,9 +260,9 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
 
               {/* Target Categories */}
               <tr>
-                <td className="p-4 font-bold text-slate-700 bg-slate-50/50">Eligible Categories</td>
+                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-850/50">Eligible Categories</td>
                 {selectedSchemes.map(s => (
-                  <td key={s.id} className="p-4 text-slate-700">
+                  <td key={s.id} className="p-4 text-slate-700 dark:text-slate-300">
                     {s.rules.eligibleCategories.join(', ')}
                   </td>
                 ))}
@@ -270,28 +270,28 @@ export const SchemeCompare: React.FC<SchemeCompareProps> = ({
 
               {/* Channel Partners */}
               <tr>
-                <td className="p-4 font-bold text-slate-700 bg-slate-50/50">Implementation Channel</td>
+                <td className="p-4 font-bold text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-850/50">Implementation Channel</td>
                 {selectedSchemes.map(s => (
-                  <td key={s.id} className="p-4 text-slate-600 leading-relaxed">
+                  <td key={s.id} className="p-4 text-slate-600 dark:text-slate-400 leading-relaxed">
                     {s.channelPartners.slice(0, 3).join(', ')}
                   </td>
                 ))}
               </tr>
 
               {/* Action Buttons */}
-              <tr className="bg-slate-50/40">
-                <td className="p-4 font-bold text-slate-700">Actions</td>
+              <tr className="bg-slate-50/40 dark:bg-slate-850/40">
+                <td className="p-4 font-bold text-slate-700 dark:text-slate-300">Actions</td>
                 {selectedSchemes.map(s => (
                   <td key={s.id} className="p-4 space-y-2">
                     <button
                       onClick={() => onSelectSchemeDetails(s)}
-                      className="w-full py-1.5 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition"
+                      className="w-full py-1.5 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-semibold text-xs transition cursor-pointer"
                     >
                       Full Details
                     </button>
                     <button
                       onClick={() => onOpenChecklist(s)}
-                      className="w-full py-1.5 px-3 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition"
+                      className="w-full py-1.5 px-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs transition cursor-pointer"
                     >
                       Checklist
                     </button>
