@@ -14,6 +14,7 @@ import {
 import { ApplicantProfile, Scheme } from '../../types';
 import { Language } from '../../utils/translations';
 import { APP_CONFIG } from '../../config/appConfig';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface Message {
   id: string;
@@ -178,8 +179,11 @@ export const SchemeMitraModal: React.FC<SchemeMitraModalProps> = ({
         {/* Chat Messages Log */}
         <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50/50 dark:bg-slate-900/50 text-xs">
           {messages.map((msg) => (
-            <div
+            <motion.div
               key={msg.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
               className={`flex items-start space-x-2.5 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {msg.sender === 'mitra' && (
@@ -206,14 +210,35 @@ export const SchemeMitraModal: React.FC<SchemeMitraModalProps> = ({
                   <User className="w-4 h-4" />
                 </div>
               )}
-            </div>
+            </motion.div>
           ))}
 
           {isLoading && (
-            <div className="flex items-center space-x-2 text-slate-400 dark:text-slate-500 p-2">
-              <Loader2 className="w-4 h-4 animate-spin text-indigo-600 dark:text-indigo-400" />
-              <span>Scheme Mitra is formulating guidance...</span>
-            </div>
+            <motion.div 
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex items-center space-x-2 text-slate-500 dark:text-slate-400 p-2"
+            >
+              <div className="flex items-center space-x-1">
+                <motion.span
+                  className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"
+                  animate={{ opacity: [0.3, 1, 0.3], scale: [0.9, 1.1, 0.9] }}
+                  transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+                />
+                <motion.span
+                  className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"
+                  animate={{ opacity: [0.3, 1, 0.3], scale: [0.9, 1.1, 0.9] }}
+                  transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut', delay: 0.2 }}
+                />
+                <motion.span
+                  className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400"
+                  animate={{ opacity: [0.3, 1, 0.3], scale: [0.9, 1.1, 0.9] }}
+                  transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
+                />
+              </div>
+              <span className="text-[11px]">Scheme Mitra is formulating guidance...</span>
+            </motion.div>
           )}
 
           <div ref={messagesEndRef} />
@@ -224,18 +249,36 @@ export const SchemeMitraModal: React.FC<SchemeMitraModalProps> = ({
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
             Suggested Guidance Questions:
           </span>
-          <div className="flex flex-wrap gap-1.5">
+          <motion.div 
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: { staggerChildren: 0.05 }
+              }
+            }}
+            className="flex flex-wrap gap-1.5"
+          >
             {suggestedQuestions.map((q, idx) => (
-              <button
+              <motion.button
                 key={idx}
+                variants={{
+                  hidden: { opacity: 0, y: 5 },
+                  visible: { opacity: 1, y: 0 }
+                }}
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.15 }}
                 onClick={() => handleSend(q)}
                 disabled={isLoading}
-                className="text-[11px] text-left px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 hover:text-indigo-700 dark:hover:text-indigo-300 text-slate-700 dark:text-slate-200 transition border border-slate-200 dark:border-slate-700 cursor-pointer shadow-xs"
+                className="text-[11px] text-left px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 hover:text-indigo-700 dark:hover:text-indigo-300 text-slate-700 dark:text-slate-200 transition-colors border border-slate-200 dark:border-slate-700 cursor-pointer shadow-xs"
               >
                 {q}
-              </button>
+              </motion.button>
             ))}
-          </div>
+          </motion.div>
         </div>
 
         {/* Message Input Box */}

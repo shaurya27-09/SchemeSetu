@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   X, 
   ExternalLink, 
@@ -11,11 +11,14 @@ import {
   MapPin,
   Clock,
   Briefcase,
-  Users
+  Users,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { Scheme } from '../../types';
 import { Language } from '../../utils/translations';
 import { formatIndianCurrency } from '../../services/emiCalculator';
+import { Accordion } from '../motion-primitives';
 
 interface SchemeDetailsModalProps {
   scheme: Scheme | null;
@@ -33,6 +36,17 @@ export const SchemeDetailsModal: React.FC<SchemeDetailsModalProps> = ({
   onOpenLocator
 }) => {
   if (!scheme) return null;
+
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    rules: true,
+    benefits: true,
+    workflow: true,
+    documents: true,
+  });
+
+  const toggleSection = (section: string) => {
+    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
@@ -131,79 +145,175 @@ export const SchemeDetailsModal: React.FC<SchemeDetailsModalProps> = ({
             </div>
           </div>
 
-          {/* Eligibility Rules Detail */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Deterministic Eligibility Rules
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2 bg-white dark:bg-slate-900">
-                <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
-                  <span className="text-slate-500 dark:text-slate-400">Eligible Categories:</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200">{scheme.rules.eligibleCategories.join(', ')}</span>
-                </div>
-                <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
-                  <span className="text-slate-500 dark:text-slate-400">Age Bracket:</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200">{scheme.rules.minAge} to {scheme.rules.maxAge} Years</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 dark:text-slate-400">Annual Family Income Limit:</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200">
-                    {scheme.rules.maxAnnualIncome === 0 ? "No Income Ceiling" : formatIndianCurrency(scheme.rules.maxAnnualIncome)}
-                  </span>
-                </div>
+          {/* Eligibility Rules Detail Accordion */}
+          <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-white dark:bg-slate-900/50">
+            <button
+              type="button"
+              onClick={() => toggleSection('rules')}
+              className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 dark:hover:bg-slate-850/50 transition cursor-pointer"
+            >
+              <div className="flex items-center space-x-2">
+                <ShieldCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                  Deterministic Eligibility Rules
+                </h3>
               </div>
+              {openSections.rules ? (
+                <ChevronUp className="w-4 h-4 text-slate-400" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-slate-400" />
+              )}
+            </button>
+            <Accordion isOpen={openSections.rules}>
+              <div className="p-4 pt-0 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2 bg-slate-50/50 dark:bg-slate-900">
+                  <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                    <span className="text-slate-500 dark:text-slate-400">Eligible Categories:</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{scheme.rules.eligibleCategories.join(', ')}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                    <span className="text-slate-500 dark:text-slate-400">Age Bracket:</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{scheme.rules.minAge} to {scheme.rules.maxAge} Years</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 dark:text-slate-400">Annual Family Income Limit:</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">
+                      {scheme.rules.maxAnnualIncome === 0 ? "No Income Ceiling" : formatIndianCurrency(scheme.rules.maxAnnualIncome)}
+                    </span>
+                  </div>
+                </div>
 
-              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2 bg-white dark:bg-slate-900">
-                <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
-                  <span className="text-slate-500 dark:text-slate-400">Gender Eligibility:</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200 capitalize">{scheme.rules.eligibleGenders.join(', ')}</span>
-                </div>
-                <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
-                  <span className="text-slate-500 dark:text-slate-400">Minimum Project Cost:</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200">{formatIndianCurrency(scheme.rules.minProjectCost)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 dark:text-slate-400">Channel Partners:</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200">State SCAs & Banks</span>
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2 bg-slate-50/50 dark:bg-slate-900">
+                  <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                    <span className="text-slate-500 dark:text-slate-400">Gender Eligibility:</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200 capitalize">{scheme.rules.eligibleGenders.join(', ')}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                    <span className="text-slate-500 dark:text-slate-400">Minimum Project Cost:</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{formatIndianCurrency(scheme.rules.minProjectCost)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 dark:text-slate-400">Channel Partners:</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">State SCAs & Banks</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Accordion>
           </div>
 
-          {/* Key Advantages & Special Benefits */}
+          {/* Key Advantages & Special Benefits Accordion */}
           {(scheme.specialBenefits || []).length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Special Program Benefits
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {(scheme.specialBenefits || []).map((benefit, idx) => (
-                  <div key={idx} className="flex items-start space-x-2 text-xs text-slate-700 dark:text-slate-200 p-2.5 rounded-lg bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80">
-                    <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                    <span>{benefit}</span>
-                  </div>
-                ))}
-              </div>
+            <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-white dark:bg-slate-900/50">
+              <button
+                type="button"
+                onClick={() => toggleSection('benefits')}
+                className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 dark:hover:bg-slate-850/50 transition cursor-pointer"
+              >
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                    Special Program Benefits
+                  </h3>
+                </div>
+                {openSections.benefits ? (
+                  <ChevronUp className="w-4 h-4 text-slate-400" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-slate-400" />
+                )}
+              </button>
+              <Accordion isOpen={openSections.benefits}>
+                <div className="p-4 pt-0 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {(scheme.specialBenefits || []).map((benefit, idx) => (
+                    <div key={idx} className="flex items-start space-x-2 text-xs text-slate-700 dark:text-slate-200 p-2.5 rounded-lg bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80">
+                      <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                      <span>{benefit}</span>
+                    </div>
+                  ))}
+                </div>
+              </Accordion>
             </div>
           )}
 
-          {/* Step-by-Step Application Workflow */}
+          {/* Step-by-Step Application Workflow Accordion */}
           {(scheme.applicationProcess || []).length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Standard Application & Sanction Workflow
-              </h3>
-              <div className="space-y-2">
-                {(scheme.applicationProcess || []).map((step, idx) => (
-                  <div key={idx} className="p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex items-start space-x-3 bg-white dark:bg-slate-900">
-                    <span className="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-950/90 text-indigo-700 dark:text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5 border border-indigo-200 dark:border-indigo-800">
-                      {idx + 1}
-                    </span>
-                    <span className="text-slate-700 dark:text-slate-200">{step}</span>
-                  </div>
-                ))}
-              </div>
+            <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-white dark:bg-slate-900/50">
+              <button
+                type="button"
+                onClick={() => toggleSection('workflow')}
+                className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 dark:hover:bg-slate-850/50 transition cursor-pointer"
+              >
+                <div className="flex items-center space-x-2">
+                  <Clock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                    Standard Application & Sanction Workflow
+                  </h3>
+                </div>
+                {openSections.workflow ? (
+                  <ChevronUp className="w-4 h-4 text-slate-400" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-slate-400" />
+                )}
+              </button>
+              <Accordion isOpen={openSections.workflow}>
+                <div className="p-4 pt-0 space-y-2">
+                  {(scheme.applicationProcess || []).map((step, idx) => (
+                    <div key={idx} className="p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex items-start space-x-3 bg-slate-50/50 dark:bg-slate-900">
+                      <span className="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-950/90 text-indigo-700 dark:text-indigo-300 font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5 border border-indigo-200 dark:border-indigo-800">
+                        {idx + 1}
+                      </span>
+                      <span className="text-slate-700 dark:text-slate-200">{step}</span>
+                    </div>
+                  ))}
+                </div>
+              </Accordion>
+            </div>
+          )}
+
+          {/* Required Documents Accordion */}
+          {(scheme.documents || []).length > 0 && (
+            <div className="border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-white dark:bg-slate-900/50">
+              <button
+                type="button"
+                onClick={() => toggleSection('documents')}
+                className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 dark:hover:bg-slate-850/50 transition cursor-pointer"
+              >
+                <div className="flex items-center space-x-2">
+                  <FileText className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+                    Required Documents Checklist ({(scheme.documents || []).length})
+                  </h3>
+                </div>
+                {openSections.documents ? (
+                  <ChevronUp className="w-4 h-4 text-slate-400" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-slate-400" />
+                )}
+              </button>
+              <Accordion isOpen={openSections.documents}>
+                <div className="p-4 pt-0 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  {(scheme.documents || []).map((doc, idx) => (
+                    <div key={idx} className="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900 flex items-start justify-between gap-2">
+                      <div>
+                        <div className="font-semibold text-slate-800 dark:text-slate-200">
+                          {language === 'hi' ? doc.titleHi || doc.title : doc.title}
+                        </div>
+                        {doc.description && (
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                            {language === 'hi' ? doc.descriptionHi || doc.description : doc.description}
+                          </div>
+                        )}
+                      </div>
+                      <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                        doc.requirementType === 'required'
+                          ? 'bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300'
+                          : 'bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-300'
+                      }`}>
+                        {doc.requirementType}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </Accordion>
             </div>
           )}
 

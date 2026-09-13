@@ -9,12 +9,15 @@ import {
   ExternalLink,
   ChevronRight,
   ShieldCheck,
-  Building
+  Building,
+  Check
 } from 'lucide-react';
 import { Scheme, ApplicantProfile, DocumentRequirement } from '../../types';
 import { Language, TRANSLATIONS } from '../../utils/translations';
 import { generateDocumentChecklist } from '../../services/documentService';
 import { dataStore } from '../../services/dataStore';
+import { motion, AnimatePresence } from 'motion/react';
+import { AnimatedNumber } from '../motion-primitives';
 
 interface DocumentChecklistViewProps {
   language: Language;
@@ -49,7 +52,9 @@ export const DocumentChecklistView: React.FC<DocumentChecklistViewProps> = ({
   };
 
   const totalMandatory = mandatoryList.length + conditionalList.length;
+  const totalDocs = totalMandatory + optionalList.length;
   const preparedCount = Object.values(preparedDocs).filter(Boolean).length;
+  const readinessPercent = totalDocs > 0 ? Math.round((preparedCount / totalDocs) * 100) : 0;
 
   const handlePrint = () => {
     window.print();
@@ -124,12 +129,25 @@ export const DocumentChecklistView: React.FC<DocumentChecklistViewProps> = ({
             </p>
           </div>
 
-          {/* Prepared status indicator */}
-          <div className="p-3 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 text-right no-print">
-            <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block">Dossier Readiness</span>
-            <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              {preparedCount} of {totalMandatory + checklist.optional.length} Documents Prepared
+          {/* Prepared status indicator with smooth progress bar */}
+          <div className="p-3 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 min-w-[220px] text-right no-print space-y-2">
+            <div className="flex justify-between items-center text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">
+              <span>Dossier Readiness</span>
+              <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                <AnimatedNumber value={readinessPercent} suffix="%" duration={0.3} />
+              </span>
+            </div>
+            <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+              {preparedCount} of {totalDocs} Documents Prepared
             </span>
+            <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
+              <motion.div
+                className="bg-emerald-500 h-1.5 rounded-full"
+                initial={false}
+                animate={{ width: `${readinessPercent}%` }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+              />
+            </div>
           </div>
         </div>
 
@@ -151,24 +169,41 @@ export const DocumentChecklistView: React.FC<DocumentChecklistViewProps> = ({
             {mandatoryList.map((doc) => {
               const isChecked = Boolean(preparedDocs[doc.id]);
               return (
-                <div 
+                <motion.div 
                   key={doc.id}
                   onClick={() => togglePrepared(doc.id)}
-                  className={`p-4 rounded-xl border transition cursor-pointer flex items-start space-x-3.5 ${
+                  whileHover={{ y: -1 }}
+                  transition={{ duration: 0.15 }}
+                  className={`p-4 rounded-xl border transition cursor-pointer flex items-start space-x-3.5 select-none ${
                     isChecked 
                       ? 'bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700' 
                       : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                   }`}
                 >
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={() => {}}
-                    className="mt-1 w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-500 focus:ring-indigo-500 dark:focus:ring-indigo-400 accent-indigo-600 dark:accent-indigo-500 cursor-pointer shrink-0"
-                  />
+                  <motion.div
+                    whileTap={{ scale: 0.85 }}
+                    className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center transition-colors shrink-0 ${
+                      isChecked
+                        ? 'bg-emerald-600 border-emerald-600 text-white dark:bg-emerald-500 dark:border-emerald-500'
+                        : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600'
+                    }`}
+                  >
+                    <AnimatePresence>
+                      {isChecked && (
+                        <motion.span
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          transition={{ duration: 0.15 }}
+                        >
+                          <Check className="w-3.5 h-3.5 stroke-[3]" />
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center justify-between gap-2">
-                      <h4 className={`text-sm font-bold ${isChecked ? 'text-emerald-800 dark:text-emerald-300 line-through' : 'text-slate-900 dark:text-slate-100'}`}>
+                      <h4 className={`text-sm font-bold transition-all duration-200 ${isChecked ? 'text-emerald-800 dark:text-emerald-300 line-through opacity-80' : 'text-slate-900 dark:text-slate-100'}`}>
                         {doc.title}
                       </h4>
                       <span className="shrink-0 text-[10px] font-bold uppercase bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-200 border border-rose-200 dark:border-rose-800 px-2 py-0.5 rounded-full">
@@ -182,7 +217,7 @@ export const DocumentChecklistView: React.FC<DocumentChecklistViewProps> = ({
                       {doc.validity && <span>Validity: <span className="text-slate-700 dark:text-slate-300">{doc.validity}</span></span>}
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
@@ -207,24 +242,41 @@ export const DocumentChecklistView: React.FC<DocumentChecklistViewProps> = ({
               {conditionalList.map((doc) => {
                 const isChecked = Boolean(preparedDocs[doc.id]);
                 return (
-                  <div 
+                  <motion.div 
                     key={doc.id}
                     onClick={() => togglePrepared(doc.id)}
-                    className={`p-4 rounded-xl border transition cursor-pointer flex items-start space-x-3.5 ${
+                    whileHover={{ y: -1 }}
+                    transition={{ duration: 0.15 }}
+                    className={`p-4 rounded-xl border transition cursor-pointer flex items-start space-x-3.5 select-none ${
                       isChecked 
                         ? 'bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700' 
                         : 'bg-amber-50/40 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/70 hover:border-amber-300 dark:hover:border-amber-600'
                     }`}
                   >
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={() => {}}
-                      className="mt-1 w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-500 focus:ring-indigo-500 dark:focus:ring-indigo-400 accent-indigo-600 dark:accent-indigo-500 cursor-pointer shrink-0"
-                    />
+                    <motion.div
+                      whileTap={{ scale: 0.85 }}
+                      className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center transition-colors shrink-0 ${
+                        isChecked
+                          ? 'bg-emerald-600 border-emerald-600 text-white dark:bg-emerald-500 dark:border-emerald-500'
+                          : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600'
+                      }`}
+                    >
+                      <AnimatePresence>
+                        {isChecked && (
+                          <motion.span
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                            transition={{ duration: 0.15 }}
+                          >
+                            <Check className="w-3.5 h-3.5 stroke-[3]" />
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center justify-between gap-2">
-                        <h4 className={`text-sm font-bold ${isChecked ? 'text-emerald-800 dark:text-emerald-300 line-through' : 'text-slate-900 dark:text-slate-100'}`}>
+                        <h4 className={`text-sm font-bold transition-all duration-200 ${isChecked ? 'text-emerald-800 dark:text-emerald-300 line-through opacity-80' : 'text-slate-900 dark:text-slate-100'}`}>
                           {doc.title}
                         </h4>
                         <span className="shrink-0 text-[10px] font-bold uppercase bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-800 px-2 py-0.5 rounded-full">
@@ -238,7 +290,7 @@ export const DocumentChecklistView: React.FC<DocumentChecklistViewProps> = ({
                         </div>
                       )}
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
@@ -264,24 +316,41 @@ export const DocumentChecklistView: React.FC<DocumentChecklistViewProps> = ({
               {optionalList.map((doc) => {
                 const isChecked = Boolean(preparedDocs[doc.id]);
                 return (
-                  <div 
+                  <motion.div 
                     key={doc.id}
                     onClick={() => togglePrepared(doc.id)}
-                    className={`p-4 rounded-xl border transition cursor-pointer flex items-start space-x-3.5 ${
+                    whileHover={{ y: -1 }}
+                    transition={{ duration: 0.15 }}
+                    className={`p-4 rounded-xl border transition cursor-pointer flex items-start space-x-3.5 select-none ${
                       isChecked 
                         ? 'bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-700' 
                         : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                     }`}
                   >
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={() => {}}
-                      className="mt-1 w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-500 focus:ring-indigo-500 dark:focus:ring-indigo-400 accent-indigo-600 dark:accent-indigo-500 cursor-pointer shrink-0"
-                    />
+                    <motion.div
+                      whileTap={{ scale: 0.85 }}
+                      className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center transition-colors shrink-0 ${
+                        isChecked
+                          ? 'bg-emerald-600 border-emerald-600 text-white dark:bg-emerald-500 dark:border-emerald-500'
+                          : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600'
+                      }`}
+                    >
+                      <AnimatePresence>
+                        {isChecked && (
+                          <motion.span
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                            transition={{ duration: 0.15 }}
+                          >
+                            <Check className="w-3.5 h-3.5 stroke-[3]" />
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center justify-between gap-2">
-                        <h4 className={`text-sm font-bold ${isChecked ? 'text-emerald-800 dark:text-emerald-300 line-through' : 'text-slate-900 dark:text-slate-100'}`}>
+                        <h4 className={`text-sm font-bold transition-all duration-200 ${isChecked ? 'text-emerald-800 dark:text-emerald-300 line-through opacity-80' : 'text-slate-900 dark:text-slate-100'}`}>
                           {doc.title}
                         </h4>
                         <span className="shrink-0 text-[10px] font-bold uppercase bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded-full">
@@ -290,7 +359,7 @@ export const DocumentChecklistView: React.FC<DocumentChecklistViewProps> = ({
                       </div>
                       <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{doc.description}</p>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>

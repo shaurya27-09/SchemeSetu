@@ -27,6 +27,7 @@ import { ApplicantProfile, Scheme } from './types';
 import { Language } from './utils/translations';
 import { dataStore } from './services/dataStore';
 import { Sparkles } from 'lucide-react';
+import { motion } from 'motion/react';
 
 const getInitialView = (): string => {
   const path = typeof window !== 'undefined' ? window.location.pathname : '/';
@@ -285,15 +286,18 @@ export default function App() {
       </main>
 
       {/* Floating Action Button for Scheme Mitra AI on mobile / bottom right */}
-      <button
+      <motion.button
         id="btn-fab-scheme-mitra"
         onClick={() => setIsMitraOpen(true)}
-        className="fixed bottom-6 right-6 z-30 flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-3 rounded-full shadow-xl shadow-orange-500/20 font-bold text-xs transition transform hover:scale-105 no-print cursor-pointer"
+        whileHover={{ scale: 1.04 }}
+        whileTap={{ scale: 0.96 }}
+        transition={{ duration: 0.15 }}
+        className="fixed bottom-6 right-6 z-30 flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white px-4 py-3 rounded-full shadow-xl shadow-orange-500/20 font-bold text-xs no-print cursor-pointer"
         title="Chat with Scheme Mitra AI Assistant"
       >
         <Sparkles className="w-4 h-4 text-amber-200" />
         <span>Ask Scheme Mitra</span>
-      </button>
+      </motion.button>
 
       {/* Citizen Profile Modal */}
       <UserProfileModal

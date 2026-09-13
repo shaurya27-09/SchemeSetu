@@ -26,6 +26,8 @@ import { matchSchemes, evaluateSchemeEligibility } from '../../services/matching
 import { formatIndianCurrency } from '../../services/emiCalculator';
 import { dataStore } from '../../services/dataStore';
 import { recordMatchRunToSupabase } from '../../services/supabaseService';
+import { motion, AnimatePresence } from 'motion/react';
+import { AnimatedNumber } from '../motion-primitives';
 
 interface ResultsDashboardProps {
   language: Language;
@@ -328,18 +330,26 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
         </div>
       ) : (
         <div className="space-y-6">
-          {currentList.map((result) => {
+          {currentList.map((result, idx) => {
             const scheme = result.scheme;
             const isExpanded = expandedSchemeId === scheme.id;
             const isTopMatch = bestMatch?.schemeId === scheme.id;
 
             return (
-              <div 
+              <motion.div 
                 key={scheme.id}
-                className={`bg-white dark:bg-slate-900 rounded-2xl border transition-all ${
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  duration: 0.28, 
+                  delay: Math.min(idx * 0.05, 0.35), 
+                  ease: [0.25, 0.1, 0.25, 1] 
+                }}
+                whileHover={{ y: -3 }}
+                className={`bg-white dark:bg-slate-900 rounded-2xl border transition-shadow ${
                   isTopMatch && result.status === 'eligible'
-                    ? 'border-indigo-500 dark:border-indigo-400 shadow-md ring-1 ring-indigo-500 dark:ring-indigo-400'
-                    : 'border-slate-200 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700'
+                    ? 'border-indigo-500 dark:border-indigo-400 shadow-md ring-1 ring-indigo-500 dark:ring-indigo-400 hover:shadow-lg'
+                    : 'border-slate-200 dark:border-slate-800 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md'
                 }`}
               >
                 {/* Scheme Header Card */}
@@ -396,7 +406,7 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                             result.matchScore >= 60 ? 'text-indigo-600 dark:text-indigo-400' :
                             result.matchScore >= 40 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400'
                           }`}>
-                            {result.matchScore}%
+                            <AnimatedNumber value={result.matchScore} suffix="%" duration={0.7} />
                           </span>
                           <span className="text-xs text-slate-400 dark:text-slate-500">match</span>
                         </div>
@@ -578,60 +588,70 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
                   </div>
 
                   {/* Expandable Deterministic Rule Breakdown */}
-                  {isExpanded && (
-                    <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 text-xs space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[11px]">
-                          Deterministic Rule Engine Audit Breakdown
-                        </span>
-                        <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
-                          Scheme Code: {scheme.code} | Status: {result.status.toUpperCase()}
-                        </span>
-                      </div>
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 text-xs space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[11px]">
+                              Deterministic Rule Engine Audit Breakdown
+                            </span>
+                            <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                              Scheme Code: {scheme.code} | Status: {result.status.toUpperCase()}
+                            </span>
+                          </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                        <div className="p-2.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
-                          <span className="text-slate-500 dark:text-slate-400 block text-[10px]">Beneficiary Target Category</span>
-                          <span className="font-semibold text-slate-800 dark:text-slate-200">{scheme.rules.eligibleCategories.join(', ')}</span>
-                          <span className="block text-[10px] mt-0.5 text-emerald-600 dark:text-emerald-400 font-medium">
-                            Applicant ({profile.category}): {scheme.rules.eligibleCategories.includes(profile.category) ? '✓ Matched' : '✗ Category Ineligible'}
-                          </span>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            <div className="p-2.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                              <span className="text-slate-500 dark:text-slate-400 block text-[10px]">Beneficiary Target Category</span>
+                              <span className="font-semibold text-slate-800 dark:text-slate-200">{scheme.rules.eligibleCategories.join(', ')}</span>
+                              <span className="block text-[10px] mt-0.5 text-emerald-600 dark:text-emerald-400 font-medium">
+                                Applicant ({profile.category}): {scheme.rules.eligibleCategories.includes(profile.category) ? '✓ Matched' : '✗ Category Ineligible'}
+                              </span>
+                            </div>
+
+                            <div className="p-2.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                              <span className="text-slate-500 dark:text-slate-400 block text-[10px]">Age Range Permitted</span>
+                              <span className="font-semibold text-slate-800 dark:text-slate-200">{scheme.rules.minAge} to {scheme.rules.maxAge} years</span>
+                              <span className="block text-[10px] mt-0.5 text-emerald-600 dark:text-emerald-400 font-medium">
+                                Applicant ({profile.age} yrs): {profile.age >= scheme.rules.minAge && profile.age <= scheme.rules.maxAge ? '✓ Within Limits' : '✗ Out of Range'}
+                              </span>
+                            </div>
+
+                            <div className="p-2.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                              <span className="text-slate-500 dark:text-slate-400 block text-[10px]">Max Credit Limit</span>
+                              <span className="font-semibold text-slate-800 dark:text-slate-200">{formatIndianCurrency(scheme.rules.maxLoanAmount, true)}</span>
+                              <span className="block text-[10px] mt-0.5 font-medium text-slate-700 dark:text-slate-300">
+                                Requested: {formatIndianCurrency(profile.requestedLoanAmount, true)} ({profile.requestedLoanAmount <= scheme.rules.maxLoanAmount ? '✓ Within Limit' : '⚠ Exceeds Scheme Max'})
+                              </span>
+                            </div>
+
+                            <div className="p-2.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                              <span className="text-slate-500 dark:text-slate-400 block text-[10px]">Income Ceiling Criteria</span>
+                              <span className="font-semibold text-slate-800 dark:text-slate-200">
+                                {scheme.rules.maxAnnualIncome === 0 ? 'No Ceiling (Waiver Active)' : formatIndianCurrency(scheme.rules.maxAnnualIncome, true)}
+                              </span>
+                              <span className="block text-[10px] mt-0.5 font-medium text-slate-700 dark:text-slate-300">
+                                Declared Income: {formatIndianCurrency(profile.annualFamilyIncome, true)} ({scheme.rules.maxAnnualIncome === 0 || profile.annualFamilyIncome <= scheme.rules.maxAnnualIncome ? '✓ Eligible' : '✗ Exceeds Ceiling'})
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 pt-1">
+                            Required Documents ({(scheme.documents || []).length}): {(scheme.documents || []).map(d => d.title).join(', ')}
+                          </div>
                         </div>
-
-                        <div className="p-2.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
-                          <span className="text-slate-500 dark:text-slate-400 block text-[10px]">Age Range Permitted</span>
-                          <span className="font-semibold text-slate-800 dark:text-slate-200">{scheme.rules.minAge} to {scheme.rules.maxAge} years</span>
-                          <span className="block text-[10px] mt-0.5 text-emerald-600 dark:text-emerald-400 font-medium">
-                            Applicant ({profile.age} yrs): {profile.age >= scheme.rules.minAge && profile.age <= scheme.rules.maxAge ? '✓ Within Limits' : '✗ Out of Range'}
-                          </span>
-                        </div>
-
-                        <div className="p-2.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
-                          <span className="text-slate-500 dark:text-slate-400 block text-[10px]">Max Credit Limit</span>
-                          <span className="font-semibold text-slate-800 dark:text-slate-200">{formatIndianCurrency(scheme.rules.maxLoanAmount, true)}</span>
-                          <span className="block text-[10px] mt-0.5 font-medium text-slate-700 dark:text-slate-300">
-                            Requested: {formatIndianCurrency(profile.requestedLoanAmount, true)} ({profile.requestedLoanAmount <= scheme.rules.maxLoanAmount ? '✓ Within Limit' : '⚠ Exceeds Scheme Max'})
-                          </span>
-                        </div>
-
-                        <div className="p-2.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
-                          <span className="text-slate-500 dark:text-slate-400 block text-[10px]">Income Ceiling Criteria</span>
-                          <span className="font-semibold text-slate-800 dark:text-slate-200">
-                            {scheme.rules.maxAnnualIncome === 0 ? 'No Ceiling (Waiver Active)' : formatIndianCurrency(scheme.rules.maxAnnualIncome, true)}
-                          </span>
-                          <span className="block text-[10px] mt-0.5 font-medium text-slate-700 dark:text-slate-300">
-                            Declared Income: {formatIndianCurrency(profile.annualFamilyIncome, true)} ({scheme.rules.maxAnnualIncome === 0 || profile.annualFamilyIncome <= scheme.rules.maxAnnualIncome ? '✓ Eligible' : '✗ Exceeds Ceiling'})
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400 pt-1">
-                        Required Documents ({(scheme.documents || []).length}): {(scheme.documents || []).map(d => d.title).join(', ')}
-                      </div>
-                    </div>
-                  )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>

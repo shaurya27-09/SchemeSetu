@@ -19,6 +19,8 @@ import { dataStore } from '../../services/dataStore';
 import { formatIndianCurrency } from '../../services/emiCalculator';
 import { getBeneficiaryGroups, getIndiaStates, getLookupOptions } from '../../services/supabaseService';
 import { isSupabaseConfigured } from '../../services/supabaseClient';
+import { motion } from 'motion/react';
+import { TransitionPanel, AnimatedNumber } from '../motion-primitives';
 
 interface EligibilityWizardProps {
   language: Language;
@@ -83,6 +85,7 @@ export const EligibilityWizard: React.FC<EligibilityWizardProps> = ({
   });
 
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [direction, setDirection] = useState<number>(1);
   const totalSteps = 5;
 
   // Supabase Database-driven dropdowns (STEP 4)
@@ -222,6 +225,7 @@ export const EligibilityWizard: React.FC<EligibilityWizardProps> = ({
   const handleNext = () => {
     if (validateStep(currentStep)) {
       if (currentStep < totalSteps) {
+        setDirection(1);
         setCurrentStep(currentStep + 1);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
@@ -232,6 +236,7 @@ export const EligibilityWizard: React.FC<EligibilityWizardProps> = ({
 
   const handleBack = () => {
     if (currentStep > 1) {
+      setDirection(-1);
       setCurrentStep(currentStep - 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -299,23 +304,29 @@ export const EligibilityWizard: React.FC<EligibilityWizardProps> = ({
               currentStep === 3 ? t.stepFinancial :
               currentStep === 4 ? t.stepBusiness : t.stepEducation
             }</span>
-            <span className="text-indigo-600 dark:text-indigo-400 font-bold">{Math.round((currentStep / totalSteps) * 100)}% Completed</span>
+            <span className="text-indigo-600 dark:text-indigo-400 font-bold inline-flex items-center gap-1">
+              <AnimatedNumber value={Math.round((currentStep / totalSteps) * 100)} />
+              <span>% Completed</span>
+            </span>
           </div>
           <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
-            <div 
-              className="bg-indigo-600 dark:bg-indigo-500 h-2.5 rounded-full transition-all duration-300 ease-out"
-              style={{ width: `${(currentStep / totalSteps) * 100}%` }}
-            ></div>
+            <motion.div 
+              className="bg-indigo-600 dark:bg-indigo-500 h-2.5 rounded-full"
+              initial={false}
+              animate={{ width: `${(currentStep / totalSteps) * 100}%` }}
+              transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+            />
           </div>
         </div>
       </div>
 
       {/* Main Questionnaire Card */}
       <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 transition-colors">
-        {/* ======================================================== */}
-        {/* STEP 1: Personal & Geographic Location */}
-        {/* ======================================================== */}
-        {currentStep === 1 && (
+        <TransitionPanel activeIndex={currentStep} direction={direction}>
+          {/* ======================================================== */}
+          {/* STEP 1: Personal & Geographic Location */}
+          {/* ======================================================== */}
+          {currentStep === 1 && (
           <div className="space-y-6">
             <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
               <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center space-x-2">
@@ -886,6 +897,7 @@ export const EligibilityWizard: React.FC<EligibilityWizardProps> = ({
             </div>
           </div>
         )}
+        </TransitionPanel>
 
         {/* Wizard Navigation Controls */}
         <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">

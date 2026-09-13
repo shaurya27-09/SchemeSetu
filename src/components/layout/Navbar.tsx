@@ -21,6 +21,7 @@ import { APP_CONFIG } from '../../config/appConfig';
 import { dataStore } from '../../services/dataStore';
 import { useAuth } from '../../contexts/AuthContext';
 import { ThemeToggle } from '../common/ThemeToggle';
+import { AnimatedBackground } from '../motion-primitives';
 
 interface NavbarProps {
   currentView: string;
@@ -273,14 +274,20 @@ export const Navbar: React.FC<NavbarProps> = ({
                           item.highlight
                             ? 'bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 shadow-sm shadow-indigo-200 dark:shadow-none'
                             : isActive
-                            ? 'text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 font-bold'
+                            ? 'text-indigo-700 dark:text-indigo-300 font-bold'
                             : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
                         }`}
                       >
-                        <Icon className={`w-3.5 h-3.5 shrink-0 ${item.highlight ? 'text-white' : isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-400'}`} />
-                        <span className="whitespace-nowrap">{item.label}</span>
+                        {isActive && !item.highlight && (
+                          <AnimatedBackground
+                            layoutId="navbar-active-pill"
+                            className="absolute inset-0 rounded-lg bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200/70 dark:border-indigo-800/70 shadow-xs"
+                          />
+                        )}
+                        <Icon className={`w-3.5 h-3.5 shrink-0 relative z-10 ${item.highlight ? 'text-white' : isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-400'}`} />
+                        <span className="whitespace-nowrap relative z-10">{item.label}</span>
                         {item.badge !== undefined && (
-                          <span className="ml-1 px-1.5 py-0.2 rounded-full bg-amber-500 text-white text-[10px] font-bold shrink-0">
+                          <span className="ml-1 px-1.5 py-0.2 rounded-full bg-amber-500 text-white text-[10px] font-bold shrink-0 relative z-10">
                             {item.badge}
                           </span>
                         )}

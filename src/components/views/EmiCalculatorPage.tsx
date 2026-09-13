@@ -16,6 +16,8 @@ import { calculateEmiViaRpc } from '../../services/supabaseService';
 import { Language, TRANSLATIONS } from '../../utils/translations';
 import { dataStore } from '../../services/dataStore';
 import { Scheme } from '../../types';
+import { motion } from 'motion/react';
+import { AnimatedNumber } from '../motion-primitives';
 
 interface EmiCalculatorPageProps {
   language: Language;
@@ -288,8 +290,9 @@ export const EmiCalculatorPage: React.FC<EmiCalculatorPageProps> = ({
               <span className="text-xs uppercase tracking-wider text-indigo-300 font-bold">
                 Calculated Monthly Installment
               </span>
-              <div className="text-3xl sm:text-4xl font-black text-white mt-1">
-                {formatIndianCurrency(emiResult.monthlyEmi)}
+              <div className="text-3xl sm:text-4xl font-black text-white mt-1 flex items-baseline">
+                <span>₹</span>
+                <span className="ml-1"><AnimatedNumber value={Math.round(emiResult.monthlyEmi)} duration={0.35} /></span>
                 <span className="text-xs font-normal text-indigo-300 ml-2">/ month</span>
               </div>
             </div>
@@ -298,33 +301,47 @@ export const EmiCalculatorPage: React.FC<EmiCalculatorPageProps> = ({
             <div className="grid grid-cols-3 gap-3 pt-4 border-t border-indigo-800 text-xs">
               <div>
                 <span className="text-indigo-300 block">Principal Borrowed:</span>
-                <span className="text-base font-bold text-white">{formatIndianCurrency(emiResult.principal, true)}</span>
+                <span className="text-base font-bold text-white flex items-center">
+                  ₹<AnimatedNumber value={Math.round(emiResult.principal)} duration={0.35} />
+                </span>
               </div>
               <div>
                 <span className="text-indigo-300 block">Total Interest:</span>
-                <span className="text-base font-bold text-emerald-400">{formatIndianCurrency(emiResult.totalInterest, true)}</span>
+                <span className="text-base font-bold text-emerald-400 flex items-center">
+                  ₹<AnimatedNumber value={Math.round(emiResult.totalInterest)} duration={0.35} />
+                </span>
               </div>
               <div>
                 <span className="text-indigo-300 block">Total Repayment:</span>
-                <span className="text-base font-bold text-amber-300">{formatIndianCurrency(emiResult.totalRepayment, true)}</span>
+                <span className="text-base font-bold text-amber-300 flex items-center">
+                  ₹<AnimatedNumber value={Math.round(emiResult.totalRepayment)} duration={0.35} />
+                </span>
               </div>
             </div>
 
             {/* Visual Ratio Progress Bar */}
             <div className="space-y-2 pt-2">
               <div className="flex justify-between text-xs font-semibold">
-                <span className="text-indigo-200">Principal ({principalRatio}%)</span>
-                <span className="text-emerald-300">Interest ({interestRatio}%)</span>
+                <span className="text-indigo-200">
+                  Principal (<AnimatedNumber value={principalRatio} suffix="%" duration={0.3} />)
+                </span>
+                <span className="text-emerald-300">
+                  Interest (<AnimatedNumber value={interestRatio} suffix="%" duration={0.3} />)
+                </span>
               </div>
               <div className="w-full bg-slate-800 rounded-full h-3 flex overflow-hidden">
-                <div 
-                  className="bg-indigo-500 h-3 transition-all duration-300"
-                  style={{ width: `${principalRatio}%` }}
-                ></div>
-                <div 
-                  className="bg-emerald-400 h-3 transition-all duration-300"
-                  style={{ width: `${interestRatio}%` }}
-                ></div>
+                <motion.div 
+                  className="bg-indigo-500 h-3"
+                  initial={false}
+                  animate={{ width: `${principalRatio}%` }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                />
+                <motion.div 
+                  className="bg-emerald-400 h-3"
+                  initial={false}
+                  animate={{ width: `${interestRatio}%` }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                />
               </div>
             </div>
 
